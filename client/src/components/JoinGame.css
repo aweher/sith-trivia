@@ -1,42 +1,136 @@
 .join-game-container {
-  max-width: 400px;
-  margin: 50px auto;
-  padding: 30px;
-  background: white;
-  border-radius: 10px;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 2rem;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.9), rgba(139, 0, 0, 0.3));
+  position: relative;
+  overflow: hidden;
 }
 
-.join-game-container h2 {
+.join-game-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, transparent 0%, rgba(255, 0, 0, 0.1) 50%, transparent 100%);
+  animation: sithGlow 3s infinite;
+  pointer-events: none;
+}
+
+.join-game-content {
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.9), rgba(139, 0, 0, 0.2));
+  padding: 2rem;
+  border-radius: 8px;
+  border: 2px solid var(--sith-red);
+  box-shadow: 0 0 20px var(--sith-red);
   text-align: center;
-  color: #333;
-  margin-bottom: 30px;
-}
-
-.input-group {
-  margin-bottom: 20px;
-}
-
-.input-group input {
+  max-width: 500px;
   width: 100%;
-  padding: 12px;
-  border: 1px solid #ddd;
+  position: relative;
+  z-index: 1;
+}
+
+.join-game-content h2 {
+  color: var(--sith-gold);
+  font-size: 2rem;
+  margin-bottom: 2rem;
+  text-shadow: 0 0 10px var(--sith-red);
+}
+
+.join-game-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.join-game-input {
+  padding: 1rem;
+  font-size: 1.2rem;
+  background: rgba(0, 0, 0, 0.8);
+  border: 2px solid var(--sith-red);
   border-radius: 4px;
-  font-size: 1rem;
+  color: var(--sith-gold);
+  text-align: center;
+  transition: all 0.3s ease;
 }
 
-.join-button {
-  width: 100%;
-  background-color: #2196F3;
-  color: white;
-  padding: 12px;
+.join-game-input:focus {
+  outline: none;
+  box-shadow: 0 0 15px var(--sith-red);
+  border-color: var(--sith-gold);
+}
+
+.join-game-button {
+  padding: 1rem 2rem;
+  font-size: 1.2rem;
+  background: linear-gradient(to bottom, var(--sith-red), var(--sith-dark-red));
+  color: var(--sith-gold);
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 1rem;
-  transition: background-color 0.2s;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-weight: bold;
+  text-shadow: 0 0 5px var(--sith-red);
 }
 
-.join-button:hover {
-  background-color: #1976D2;
+.join-game-button:hover:not(:disabled) {
+  transform: scale(1.05);
+  box-shadow: 0 0 20px var(--sith-red);
+}
+
+.join-game-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.error-message {
+  color: var(--sith-red);
+  margin-top: 1rem;
+  text-shadow: 0 0 5px var(--sith-red);
+  font-size: 1.1rem;
+}
+
+.kyber-image {
+  width: 150px;
+  height: 150px;
+  margin-bottom: 2rem;
+  animation: kyberPulse 2s infinite;
+  filter: drop-shadow(0 0 10px var(--sith-red));
+}
+
+@keyframes kyberPulse {
+  0% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 10px var(--sith-red));
+  }
+  50% {
+    transform: scale(1.1);
+    filter: drop-shadow(0 0 20px var(--sith-red));
+  }
+  100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 10px var(--sith-red));
+  }
+}
+
+@keyframes sithGlow {
+  0% {
+    opacity: 0.3;
+    transform: translateX(-100%);
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 0.3;
+    transform: translateX(100%);
+  }
 } 

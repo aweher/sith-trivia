@@ -427,7 +427,7 @@ io.on('connection', (socket) => {
         );
 
         if (allPlayersAnswered) {
-          // Esperar 3 segundos antes de pasar a la siguiente pregunta
+          // Esperar 8 segundos antes de pasar a la siguiente pregunta
           setTimeout(async () => {
             // Avanzar a la siguiente pregunta
             game.currentQuestion++;
@@ -471,7 +471,7 @@ io.on('connection', (socket) => {
                 responseTimes: game.responseTimes
               });
             }
-          }, 3000);
+          }, 8000); // Cambiado de 3000 a 8000 milisegundos
         }
 
         console.log(`Answer submitted for game ${normalizedRoomId}`);

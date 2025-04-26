@@ -41,8 +41,6 @@ function GameRoom({ socket, gameId, playerName }) {
       setGameStarted(true);
       setGameEnded(false);
       setSelectedAnswer(null);
-      setScores({});
-      setResponseTimes({});
       setShowFeedback(false);
       setShowCountdown(false);
     });
@@ -69,15 +67,16 @@ function GameRoom({ socket, gameId, playerName }) {
             setCountdown(prev => {
               if (prev <= 1) {
                 clearInterval(countdownInterval);
-                // Esperar un momento antes de ocultar el countdown
-                setTimeout(() => {
-                  setShowCountdown(false);
-                }, 1000);
                 return 0;
               }
               return prev - 1;
             });
           }, 1000);
+
+          // Mantener la pantalla visible por 8 segundos en total
+          setTimeout(() => {
+            setShowCountdown(false);
+          }, 8000);
         }, 2000);
       }
     });
@@ -188,7 +187,7 @@ function GameRoom({ socket, gameId, playerName }) {
       )}
 
       {showCountdown && (
-        <div className="countdown-container">
+        <div className="countdown-container" style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
           <h3>¡Prepárate para la siguiente pregunta!</h3>
           <div className="countdown-number">{countdown}</div>
         </div>
