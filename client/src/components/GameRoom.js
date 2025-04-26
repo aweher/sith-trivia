@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import './GameRoom.css';
+import kyberRed from '../assets/kyber_red.png';
+import kyberGreen from '../assets/kyber_green.png';
 
 function GameRoom({ socket, gameId, playerName }) {
   const { gameId: urlGameId } = useParams();
@@ -14,6 +16,8 @@ function GameRoom({ socket, gameId, playerName }) {
   const [gameEnded, setGameEnded] = useState(false);
   const [isHost, setIsHost] = useState(false);
   const [error, setError] = useState('');
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [isCorrect, setIsCorrect] = useState(false);
 
   useEffect(() => {
     console.log('Setting up socket listeners');
@@ -38,9 +42,18 @@ function GameRoom({ socket, gameId, playerName }) {
       setSelectedAnswer(null);
       setScores({});
       setResponseTimes({});
+      setShowFeedback(false);
     });
 
     socket.on('answerResult', ({ playerId, isCorrect, points, timeTaken }) => {
+      if (playerId === socket.id) {
+        setIsCorrect(isCorrect);
+        setShowFeedback(true);
+        // Ocultar el feedback después de 2 segundos
+        setTimeout(() => {
+          setShowFeedback(false);
+        }, 2000);
+      }
       setScores(prev => ({
         ...prev,
         [playerId]: (prev[playerId] || 0) + points
@@ -134,6 +147,19 @@ function GameRoom({ socket, gameId, playerName }) {
       </div>
 
       {error && <div className="error-message">{error}</div>}
+
+      {showFeedback && (
+        <div className={`feedback-container ${isCorrect ? 'correct' : 'incorrect'}`}>
+          <img 
+            src={isCorrect ? kyberGreen : kyberRed} 
+            alt={isCorrect ? "Respuesta Correcta" : "Respuesta Incorrecta"} 
+            className="feedback-image"
+          />
+          <p className="feedback-message">
+            {isCorrect ? "¡Respuesta Correcta!" : "Respuesta Incorrecta"}
+          </p>
+        </div>
+      )}
 
       {gameStarted && currentQuestion && (
         <div className="question-container">
