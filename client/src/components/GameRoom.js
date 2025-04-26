@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import './GameRoom.css';
-import kyberRed from '../assets/kyber_red.png';
-import kyberGreen from '../assets/kyber_green.png';
 
 function GameRoom({ socket, gameId, playerName }) {
   const { gameId: urlGameId } = useParams();
@@ -151,7 +149,7 @@ function GameRoom({ socket, gameId, playerName }) {
       {showFeedback && (
         <div className={`feedback-container ${isCorrect ? 'correct' : 'incorrect'}`}>
           <img 
-            src={isCorrect ? kyberGreen : kyberRed} 
+            src={`/assets/${isCorrect ? 'kyber_green.png' : 'kyber_red.png'}`}
             alt={isCorrect ? "Respuesta Correcta" : "Respuesta Incorrecta"} 
             className="feedback-image"
           />
