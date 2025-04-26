@@ -5,12 +5,13 @@ WORKDIR /app
 # Install wget for health checks
 RUN apk add --no-cache wget
 
+# Copy package files
 COPY package*.json ./
 
-# Install dependencies including react-youtube
-RUN npm install && \
-    npm install react-youtube --save
+# Install dependencies
+RUN npm install --legacy-peer-deps
 
+# Copy the rest of the application
 COPY . .
 
 EXPOSE 3000
