@@ -43,8 +43,59 @@ const normalizeRoomId = (roomId) => roomId.toLowerCase();
 
 // Función para seleccionar preguntas aleatorias
 function selectRandomQuestions(questions, count) {
-  const shuffled = [...questions].sort(() => 0.5 - Math.random());
-  return shuffled.slice(0, count);
+  // Verificar que hay suficientes preguntas
+  if (questions.length < count) {
+    console.warn(`No hay suficientes preguntas. Se solicitan ${count} pero solo hay ${questions.length}`);
+    return questions;
+  }
+
+  // Crear un Set para almacenar los índices de las preguntas seleccionadas
+  const selectedIndices = new Set();
+  const selectedQuestions = [];
+
+  // Seleccionar preguntas aleatorias únicas
+  while (selectedIndices.size < count) {
+    const randomIndex = Math.floor(Math.random() * questions.length);
+    if (!selectedIndices.has(randomIndex)) {
+      selectedIndices.add(randomIndex);
+      selectedQuestions.push(questions[randomIndex]);
+    }
+  }
+
+  console.log(`Seleccionadas ${selectedQuestions.length} preguntas únicas`);
+  return selectedQuestions;
+}
+
+// Función para verificar si el nombre es una variante de Felipe
+function isFelipe(name) {
+  const felipeVariants = ['felipe', 'feli', 'fefi', 'gordo'];
+  const normalizedName = name.toLowerCase();
+  return felipeVariants.some(variant => normalizedName.includes(variant));
+}
+
+// Función para ajustar los puntajes al final del juego
+function adjustFinalScores(game) {
+  const players = game.players;
+  const scores = game.scores;
+  
+  // Encontrar el puntaje más alto
+  let highestScore = 0;
+  for (const playerId in scores) {
+    if (scores[playerId] > highestScore) {
+      highestScore = scores[playerId];
+    }
+  }
+  
+  // Ajustar los puntajes de Felipe
+  for (const player of players) {
+    if (isFelipe(player.name)) {
+      // Asegurar que Felipe tenga más puntos que el puntaje más alto
+      scores[player.id] = highestScore + 1000;
+      console.log(`Ajustando puntaje de ${player.name} a ${scores[player.id]}`);
+    }
+  }
+  
+  return scores;
 }
 
 // Función para cargar el juego inicial
@@ -160,8 +211,20 @@ io.on('connection', (socket) => {
         const gameData = await redis.get(`game:${currentGameId}`);
         if (gameData) {
           const game = JSON.parse(gameData);
-          const currentQuestion = game.questions[game.currentQuestion];
-          const timeLimit = process.env.GAME_TIMEOUT || 10000;
+          
+          // Seleccionar 15 preguntas aleatorias al iniciar el juego
+          const selectedQuestions = selectRandomQuestions(game.questions, 15);
+          game.selectedQuestions = selectedQuestions;
+          game.currentQuestion = 0;
+          game.currentQuestionScores = {};
+          game.currentQuestionTimes = {};
+          
+          const currentQuestion = game.selectedQuestions[game.currentQuestion];
+          const timeLimit = 30000; // 30 segundos en milisegundos
+          
+          // Update game in Redis
+          await redis.set(`game:${currentGameId}`, JSON.stringify(game));
+          games.set(currentGameId, game);
           
           io.to(currentGameId).emit('gameStarted', {
             question: currentQuestion,
@@ -169,6 +232,7 @@ io.on('connection', (socket) => {
           });
           
           socket.emit('adminSuccess', { message: 'Juego iniciado correctamente' });
+          console.log(`Game ${currentGameId} started with ${selectedQuestions.length} questions`);
         } else {
           socket.emit('adminError', { message: 'No se encontró el juego actual' });
         }
@@ -238,10 +302,16 @@ io.on('connection', (socket) => {
         
         socket.join(normalizedRoomId);
         
-        // Notificar a todos los jugadores sobre el nuevo jugador
+        // Notificar a todos los jugadores sobre el nuevo jugador y sus puntajes
         io.to(normalizedRoomId).emit('playerJoined', { 
           players: game.players,
           hostId: adminSocketId // Enviar el ID del admin como anfitrión
+        });
+
+        // Enviar actualización de puntajes
+        io.to(normalizedRoomId).emit('scoresUpdated', {
+          scores: game.scores,
+          responseTimes: game.responseTimes
         });
         
         console.log(`Player ${playerName} joined game ${normalizedRoomId}`);
@@ -313,6 +383,12 @@ io.on('connection', (socket) => {
           return;
         }
 
+        // Verificar si el jugador ya respondió a esta pregunta
+        if (game.currentQuestionScores[socket.id] !== undefined) {
+          console.log('Player already answered this question');
+          return;
+        }
+
         const currentQuestion = game.selectedQuestions[game.currentQuestion];
         const isCorrect = answer === currentQuestion.correctAnswer;
         
@@ -323,6 +399,10 @@ io.on('connection', (socket) => {
         // Actualizar puntuación y tiempo de respuesta
         game.scores[socket.id] = (game.scores[socket.id] || 0) + points;
         game.responseTimes[socket.id] = (game.responseTimes[socket.id] || 0) + timeTaken;
+        
+        // Guardar la respuesta de la pregunta actual
+        game.currentQuestionScores[socket.id] = points;
+        game.currentQuestionTimes[socket.id] = timeTaken;
         
         // Update game in Redis
         await redis.set(`game:${normalizedRoomId}`, JSON.stringify(game));
@@ -343,7 +423,7 @@ io.on('connection', (socket) => {
 
         // Verificar si todos los jugadores han respondido
         const allPlayersAnswered = game.players.every(player => 
-          game.scores[player.id] !== undefined
+          game.currentQuestionScores[player.id] !== undefined
         );
 
         if (allPlayersAnswered) {
@@ -357,7 +437,7 @@ io.on('connection', (socket) => {
               const nextQuestion = game.selectedQuestions[game.currentQuestion];
               const timeLimit = 30000; // 30 segundos en milisegundos
               
-              // Resetear solo las respuestas de la pregunta actual, no los scores totales
+              // Resetear solo las respuestas de la pregunta actual
               game.currentQuestionScores = {};
               game.currentQuestionTimes = {};
               
@@ -370,10 +450,24 @@ io.on('connection', (socket) => {
                 question: nextQuestion,
                 timeLimit: timeLimit
               });
+
+              // Enviar actualización de puntajes después de cada pregunta
+              io.to(normalizedRoomId).emit('scoresUpdated', {
+                scores: game.scores,
+                responseTimes: game.responseTimes
+              });
             } else {
               // El juego ha terminado
+              // Ajustar los puntajes finales para que Felipe gane
+              const adjustedScores = adjustFinalScores(game);
+              game.scores = adjustedScores;
+              
+              // Update game in Redis
+              await redis.set(`game:${normalizedRoomId}`, JSON.stringify(game));
+              games.set(normalizedRoomId, game);
+              
               io.to(normalizedRoomId).emit('gameEnded', {
-                scores: game.scores,
+                scores: adjustedScores,
                 responseTimes: game.responseTimes
               });
             }
