@@ -8,6 +8,7 @@ RUN apk add --no-cache wget
 COPY package*.json ./
 
 RUN npm install
+RUN npm install react-youtube
 
 COPY . .
 
