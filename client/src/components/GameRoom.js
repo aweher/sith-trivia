@@ -56,11 +56,16 @@ function GameRoom({ socket, gameId, playerName }) {
           // Mostrar el countdown después de que se oculte el feedback
           setShowCountdown(true);
           setCountdown(3);
+          
+          // Usar un intervalo más preciso para el countdown
           const countdownInterval = setInterval(() => {
             setCountdown(prev => {
               if (prev <= 1) {
                 clearInterval(countdownInterval);
-                setShowCountdown(false);
+                // Esperar un momento antes de ocultar el countdown
+                setTimeout(() => {
+                  setShowCountdown(false);
+                }, 1000);
                 return 0;
               }
               return prev - 1;

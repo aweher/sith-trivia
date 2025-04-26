@@ -82,16 +82,25 @@
   box-shadow: 0 0 15px var(--sith-red);
 }
 
-.question-help {
-  background: var(--sith-dark-red);
-  padding: 15px;
-  border-radius: 8px;
-  margin: 15px 0;
-  border: 1px solid var(--sith-red);
+.question-container h3 {
   color: var(--sith-gold);
+  font-size: 1.8rem;
+  margin-bottom: 20px;
+  text-align: center;
+  text-shadow: 0 0 10px var(--sith-gold);
+}
+
+.question-help {
+  background: var(--sith-black);
+  padding: 10px;
+  border-radius: 8px;
+  margin: 10px 0 20px;
+  border: 1px solid var(--sith-gray);
+  color: var(--sith-gray);
   font-style: italic;
   text-align: center;
-  animation: glow 2s infinite;
+  font-size: 0.9rem;
+  opacity: 0.8;
 }
 
 .timer {
@@ -375,6 +384,7 @@
   z-index: 1000;
   border: 2px solid var(--sith-red);
   box-shadow: 0 0 20px var(--sith-red);
+  animation: fadeIn 0.5s ease-out;
 }
 
 .countdown-container h3 {
@@ -382,6 +392,7 @@
   font-size: 1.5rem;
   margin-bottom: 20px;
   text-shadow: 0 0 10px var(--sith-gold);
+  animation: fadeIn 0.5s ease-out;
 }
 
 .countdown-number {
@@ -389,10 +400,23 @@
   color: var(--sith-red);
   font-weight: bold;
   text-shadow: 0 0 20px var(--sith-red);
-  animation: pulse 1s infinite;
+  animation: numberPulse 1s infinite;
+  display: inline-block;
+  min-width: 100px;
 }
 
-@keyframes pulse {
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes numberPulse {
   0% {
     transform: scale(1);
     text-shadow: 0 0 20px var(--sith-red);
