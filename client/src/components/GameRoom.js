@@ -213,14 +213,13 @@ function GameRoom({ socket, gameId, playerName }) {
 
       {showCountdown && (
         <div className="countdown-container" style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
-          <h3>¡Prepárate para la siguiente pregunta!</h3>
           <div className="countdown-number">{countdown}</div>
         </div>
       )}
 
       {gameStarted && currentQuestion && !showCountdown && (
         <div className="question-container">
-          <div className="timer">Tiempo Restante: {Math.ceil(timeLeft / 1000)}s</div>
+          <div className="timer">Tiempo Restante: {Math.floor(timeLeft / 1000)}s</div>
           <h3>{currentQuestion.question}</h3>
           {currentQuestion.help && (
             <div className="question-help">

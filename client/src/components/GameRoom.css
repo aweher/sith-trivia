@@ -421,49 +421,27 @@
   left: 50%;
   transform: translate(-50%, -50%);
   background: var(--sith-black);
-  padding: 30px;
-  border-radius: 10px;
+  padding: 20px;
+  border-radius: 50%;
   text-align: center;
   z-index: 1000;
-  border: 2px solid var(--sith-red);
-  box-shadow: 0 0 20px var(--sith-red);
+  border: 3px solid var(--sith-red);
+  box-shadow: 0 0 30px var(--sith-red);
   animation: fadeIn 0.5s ease-out;
-  width: 100%;
-  max-width: 400px;
-  margin: 0 auto;
-}
-
-.countdown-container h3 {
-  color: var(--sith-gold);
-  font-size: 1.5rem;
-  margin-bottom: 20px;
-  text-shadow: 0 0 10px var(--sith-gold);
-  animation: fadeIn 0.5s ease-out;
-  width: 100%;
-  text-align: center;
+  width: 150px;
+  height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .countdown-number {
-  font-size: 4rem;
+  font-size: 5rem;
   color: var(--sith-red);
   font-weight: bold;
   text-shadow: 0 0 20px var(--sith-red);
   animation: numberPulse 1s infinite;
-  display: inline-block;
-  min-width: 100px;
-  text-align: center;
-  width: 100%;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(0.8);
-  }
-  to {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
-  }
+  line-height: 1;
 }
 
 @keyframes numberPulse {
@@ -478,6 +456,17 @@
   100% {
     transform: scale(1);
     text-shadow: 0 0 20px var(--sith-red);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
   }
 }
 
