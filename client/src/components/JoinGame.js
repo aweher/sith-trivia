@@ -7,9 +7,10 @@ function JoinGame({ socket, setGameId, setPlayerName }) {
   const [nameInput, setNameInput] = useState('');
   const [gameId, setGameIdState] = useState('');
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    console.log('Setting up gameId listener');
+    console.log('Setting up socket listeners');
     
     // Verificar si el socket está conectado
     if (socket.connected) {
@@ -27,15 +28,17 @@ function JoinGame({ socket, setGameId, setPlayerName }) {
       console.log('Received game ID from server:', gameId);
       setGameIdState(gameId);
       setError('');
+      setIsLoading(false);
     });
 
     socket.on('error', ({ message }) => {
       console.error('Server error:', message);
       setError(message);
+      setIsLoading(false);
     });
 
     return () => {
-      console.log('Cleaning up gameId listener');
+      console.log('Cleaning up socket listeners');
       socket.off('gameId');
       socket.off('error');
       socket.off('connect');
@@ -46,6 +49,8 @@ function JoinGame({ socket, setGameId, setPlayerName }) {
     e.preventDefault();
     if (nameInput && gameId) {
       console.log('Joining game with ID:', gameId);
+      setIsLoading(true);
+      setError('');
       setGameId(gameId);
       setPlayerName(nameInput);
       socket.emit('joinGame', { gameId, playerName: nameInput });
@@ -65,10 +70,15 @@ function JoinGame({ socket, setGameId, setPlayerName }) {
             value={nameInput}
             onChange={(e) => setNameInput(e.target.value)}
             required
+            disabled={isLoading}
           />
         </div>
-        <button type="submit" className="join-button" disabled={!gameId}>
-          {gameId ? 'Unirse al Juego' : 'Cargando...'}
+        <button 
+          type="submit" 
+          className="join-button"
+          disabled={!gameId || isLoading}
+        >
+          {!gameId ? 'Cargando...' : 'Unirse al Juego'}
         </button>
       </form>
     </div>

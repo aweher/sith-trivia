@@ -19,6 +19,15 @@ const io = socketIo(server, {
 // Redis connection
 const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
 
+// Middleware para prevenir caché
+app.use((req, res, next) => {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  res.setHeader('Surrogate-Control', 'no-store');
+  next();
+});
+
 app.use(cors());
 app.use(express.json());
 
@@ -102,6 +111,18 @@ io.on('connection', (socket) => {
     console.log('Sending game ID to client:', currentGameId);
     socket.emit('gameId', { gameId: currentGameId });
   }
+
+  // Manejador para cuando el cliente solicita el ID del juego
+  socket.on('requestGameId', () => {
+    console.log('Client requested game ID');
+    if (currentGameId) {
+      console.log('Sending game ID to client:', currentGameId);
+      socket.emit('gameId', { gameId: currentGameId });
+    } else {
+      console.log('No game ID available to send to client');
+      socket.emit('error', { message: 'No hay un juego disponible' });
+    }
+  });
 
   // Manejadores de administración
   socket.on('adminClearAll', async () => {
@@ -243,29 +264,17 @@ io.on('connection', (socket) => {
       if (gameData) {
         const game = JSON.parse(gameData);
         if (game.host === socket.id) {
-          // Reiniciar el estado del juego
-          game.currentQuestion = 0;
-          game.scores = {};
-          game.responseTimes = {};
-          
-          // Obtener la primera pregunta
           const currentQuestion = game.questions[game.currentQuestion];
-          const timeLimit = process.env.GAME_TIMEOUT || 10000;
+          const timeLimit = 30000; // 30 segundos en milisegundos
           
-          // Actualizar el juego en Redis
-          await redis.set(`game:${normalizedRoomId}`, JSON.stringify(game));
-          games.set(normalizedRoomId, game);
-          
-          // Notificar a todos los jugadores que el juego ha comenzado
           io.to(normalizedRoomId).emit('gameStarted', {
             question: currentQuestion,
             timeLimit: timeLimit
           });
-          
-          console.log(`Game ${normalizedRoomId} started with question:`, currentQuestion.question);
+          console.log(`Game ${normalizedRoomId} started`);
         } else {
           console.log('Unauthorized start game attempt');
-          socket.emit('error', { message: 'Solo el anfitrión puede iniciar el juego' });
+          socket.emit('error', { message: 'Solo el administrador puede iniciar el juego' });
         }
       } else {
         console.log('Game not found:', normalizedRoomId);
@@ -287,8 +296,8 @@ io.on('connection', (socket) => {
         const currentQuestion = game.questions[game.currentQuestion];
         const isCorrect = answer === currentQuestion.correctAnswer;
         
-        // Calcular puntos basados en el tiempo restante
-        const timeTaken = process.env.GAME_TIMEOUT - timeLeft;
+        // Calcular puntos basados en el tiempo restante (30 segundos máximo)
+        const timeTaken = 30000 - timeLeft;
         const points = isCorrect ? Math.floor(timeLeft / 1000) * 100 : 0;
         
         // Actualizar puntuación y tiempo de respuesta
@@ -320,7 +329,7 @@ io.on('connection', (socket) => {
             // Verificar si hay más preguntas
             if (game.currentQuestion < game.questions.length) {
               const nextQuestion = game.questions[game.currentQuestion];
-              const timeLimit = process.env.GAME_TIMEOUT || 10000;
+              const timeLimit = 30000; // 30 segundos en milisegundos
               
               // Resetear las respuestas para la nueva pregunta
               game.scores = {};

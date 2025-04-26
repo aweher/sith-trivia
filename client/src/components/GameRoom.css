@@ -361,4 +361,48 @@
   100% {
     transform: scale(1);
   }
+}
+
+.countdown-container {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--sith-black);
+  padding: 30px;
+  border-radius: 10px;
+  text-align: center;
+  z-index: 1000;
+  border: 2px solid var(--sith-red);
+  box-shadow: 0 0 20px var(--sith-red);
+}
+
+.countdown-container h3 {
+  color: var(--sith-gold);
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+  text-shadow: 0 0 10px var(--sith-gold);
+}
+
+.countdown-number {
+  font-size: 4rem;
+  color: var(--sith-red);
+  font-weight: bold;
+  text-shadow: 0 0 20px var(--sith-red);
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    text-shadow: 0 0 20px var(--sith-red);
+  }
+  50% {
+    transform: scale(1.2);
+    text-shadow: 0 0 30px var(--sith-red), 0 0 40px var(--sith-dark-red);
+  }
+  100% {
+    transform: scale(1);
+    text-shadow: 0 0 20px var(--sith-red);
+  }
 } 

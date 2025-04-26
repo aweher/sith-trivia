@@ -16,6 +16,8 @@ function GameRoom({ socket, gameId, playerName }) {
   const [error, setError] = useState('');
   const [showFeedback, setShowFeedback] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
+  const [showCountdown, setShowCountdown] = useState(false);
+  const [countdown, setCountdown] = useState(3);
 
   useEffect(() => {
     console.log('Setting up socket listeners');
@@ -41,6 +43,7 @@ function GameRoom({ socket, gameId, playerName }) {
       setScores({});
       setResponseTimes({});
       setShowFeedback(false);
+      setShowCountdown(false);
     });
 
     socket.on('answerResult', ({ playerId, isCorrect, points, timeTaken }) => {
@@ -50,6 +53,19 @@ function GameRoom({ socket, gameId, playerName }) {
         // Ocultar el feedback después de 2 segundos
         setTimeout(() => {
           setShowFeedback(false);
+          // Mostrar el countdown después de que se oculte el feedback
+          setShowCountdown(true);
+          setCountdown(3);
+          const countdownInterval = setInterval(() => {
+            setCountdown(prev => {
+              if (prev <= 1) {
+                clearInterval(countdownInterval);
+                setShowCountdown(false);
+                return 0;
+              }
+              return prev - 1;
+            });
+          }, 1000);
         }, 2000);
       }
       setScores(prev => ({
@@ -149,7 +165,7 @@ function GameRoom({ socket, gameId, playerName }) {
       {showFeedback && (
         <div className={`feedback-container ${isCorrect ? 'correct' : 'incorrect'}`}>
           <img 
-            src={`/assets/${isCorrect ? 'kyber_green.png' : 'kyber_red.png'}`}
+            src={`/assets/${isCorrect ? 'kyber_red.png' : 'kyber_green.png'}?t=${Date.now()}`}
             alt={isCorrect ? "Respuesta Correcta" : "Respuesta Incorrecta"} 
             className="feedback-image"
           />
@@ -159,7 +175,14 @@ function GameRoom({ socket, gameId, playerName }) {
         </div>
       )}
 
-      {gameStarted && currentQuestion && (
+      {showCountdown && (
+        <div className="countdown-container">
+          <h3>¡Prepárate para la siguiente pregunta!</h3>
+          <div className="countdown-number">{countdown}</div>
+        </div>
+      )}
+
+      {gameStarted && currentQuestion && !showCountdown && (
         <div className="question-container">
           <div className="timer">Tiempo Restante: {Math.ceil(timeLeft / 1000)}s</div>
           <h3>{currentQuestion.question}</h3>
