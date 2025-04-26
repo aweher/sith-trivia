@@ -1,11 +1,94 @@
 .admin-container {
-  max-width: 800px;
-  margin: 50px auto;
-  padding: 30px;
-  background: var(--sith-black);
-  border: 2px solid var(--sith-red);
-  border-radius: 10px;
-  box-shadow: 0 0 20px var(--sith-red);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 2rem;
+  background-color: var(--sith-black);
+  color: var(--sith-gold);
+  position: relative;
+}
+
+.admin-content {
+  background-color: rgba(0, 0, 0, 0.8);
+  padding: 2rem;
+  border-radius: 8px;
+  border: 2px solid var(--sith-gold);
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
+  z-index: 1;
+}
+
+.admin-controls {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.admin-button {
+  padding: 1rem 2rem;
+  font-size: 1.2rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Star Wars', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.reset-button {
+  background-color: var(--sith-red);
+  color: white;
+}
+
+.reset-button:hover {
+  background-color: #8b0000;
+  transform: scale(1.05);
+}
+
+.start-button {
+  background-color: var(--sith-gold);
+  color: var(--sith-black);
+}
+
+.start-button:hover {
+  background-color: #ffd700;
+  transform: scale(1.05);
+}
+
+.admin-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.admin-message {
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 4px;
+  text-align: center;
+  font-size: 1.1rem;
+}
+
+.youtube-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  opacity: 0.1;
+}
+
+.youtube-player {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
 }
 
 .admin-container h2 {
@@ -19,34 +102,6 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
-}
-
-.admin-button {
-  padding: 15px 30px;
-  font-size: 1.2rem;
-  background: var(--sith-dark-red);
-  color: var(--sith-gold);
-  border: 2px solid var(--sith-red);
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  min-width: 250px;
-  margin: 0 auto;
-}
-
-.admin-button:hover:not(:disabled) {
-  background: var(--sith-red);
-  color: var(--sith-black);
-  box-shadow: 0 0 20px var(--sith-red);
-  transform: scale(1.05);
-}
-
-.admin-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  background: var(--sith-gray);
-  border-color: var(--sith-gray);
-  box-shadow: none;
 }
 
 .error-message {

@@ -41,6 +41,12 @@ let adminSocketId = null;
 // Función para normalizar el ID de la sala
 const normalizeRoomId = (roomId) => roomId.toLowerCase();
 
+// Función para seleccionar preguntas aleatorias
+function selectRandomQuestions(questions, count) {
+  const shuffled = [...questions].sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, count);
+}
+
 // Función para cargar el juego inicial
 async function loadInitialGame() {
   try {
@@ -68,6 +74,8 @@ async function loadInitialGame() {
         currentQuestion: 0,
         scores: {},
         responseTimes: {},
+        currentQuestionScores: {},
+        currentQuestionTimes: {},
         host: null
       };
       
@@ -131,26 +139,17 @@ io.on('connection', (socket) => {
       const success = await clearAllData();
       if (success) {
         adminSocketId = socket.id; // Asignar admin
-        socket.emit('adminSuccess', { message: 'Todos los datos han sido borrados' });
+        // Recargar el juego después de limpiar
+        await loadInitialGame();
+        // Notificar a todos los clientes que el juego se ha reiniciado
+        io.emit('gameReset');
+        socket.emit('adminSuccess', { message: 'Juego reiniciado correctamente' });
       } else {
-        socket.emit('adminError', { message: 'Error al borrar los datos' });
+        socket.emit('adminError', { message: 'Error al reiniciar el juego' });
       }
     } catch (error) {
       console.error('Error in adminClearAll:', error);
-      socket.emit('adminError', { message: 'Error al borrar los datos' });
-    }
-  });
-
-  socket.on('adminReloadGame', async () => {
-    console.log('Admin requested to reload game data');
-    try {
-      await clearAllData();
-      await loadInitialGame();
-      adminSocketId = socket.id; // Asignar admin
-      socket.emit('adminSuccess', { message: 'Datos del juego recargados correctamente' });
-    } catch (error) {
-      console.error('Error in adminReloadGame:', error);
-      socket.emit('adminError', { message: 'Error al recargar los datos del juego' });
+      socket.emit('adminError', { message: 'Error al reiniciar el juego' });
     }
   });
 
@@ -264,14 +263,27 @@ io.on('connection', (socket) => {
       if (gameData) {
         const game = JSON.parse(gameData);
         if (game.host === socket.id) {
-          const currentQuestion = game.questions[game.currentQuestion];
+          // Seleccionar 15 preguntas aleatorias al iniciar el juego
+          const selectedQuestions = selectRandomQuestions(game.questions, 15);
+          game.selectedQuestions = selectedQuestions;
+          game.currentQuestion = 0;
+          game.scores = {};
+          game.responseTimes = {};
+          game.currentQuestionScores = {};
+          game.currentQuestionTimes = {};
+          
+          const currentQuestion = game.selectedQuestions[game.currentQuestion];
           const timeLimit = 30000; // 30 segundos en milisegundos
+          
+          // Update game in Redis
+          await redis.set(`game:${normalizedRoomId}`, JSON.stringify(game));
+          games.set(normalizedRoomId, game);
           
           io.to(normalizedRoomId).emit('gameStarted', {
             question: currentQuestion,
             timeLimit: timeLimit
           });
-          console.log(`Game ${normalizedRoomId} started`);
+          console.log(`Game ${normalizedRoomId} started with ${selectedQuestions.length} questions`);
         } else {
           console.log('Unauthorized start game attempt');
           socket.emit('error', { message: 'Solo el administrador puede iniciar el juego' });
@@ -293,7 +305,15 @@ io.on('connection', (socket) => {
       const gameData = await redis.get(`game:${normalizedRoomId}`);
       if (gameData) {
         const game = JSON.parse(gameData);
-        const currentQuestion = game.questions[game.currentQuestion];
+        
+        // Verificar que el juego ha sido iniciado y tiene preguntas seleccionadas
+        if (!game.selectedQuestions || !game.selectedQuestions[game.currentQuestion]) {
+          console.log('Game not started or no questions selected');
+          socket.emit('error', { message: 'El juego no ha sido iniciado correctamente' });
+          return;
+        }
+
+        const currentQuestion = game.selectedQuestions[game.currentQuestion];
         const isCorrect = answer === currentQuestion.correctAnswer;
         
         // Calcular puntos basados en el tiempo restante (30 segundos máximo)
@@ -307,6 +327,12 @@ io.on('connection', (socket) => {
         // Update game in Redis
         await redis.set(`game:${normalizedRoomId}`, JSON.stringify(game));
         games.set(normalizedRoomId, game);
+        
+        // Enviar actualización de puntuación a todos los jugadores
+        io.to(normalizedRoomId).emit('scoresUpdated', {
+          scores: game.scores,
+          responseTimes: game.responseTimes
+        });
         
         io.to(normalizedRoomId).emit('answerResult', {
           playerId: socket.id,
@@ -327,13 +353,13 @@ io.on('connection', (socket) => {
             game.currentQuestion++;
             
             // Verificar si hay más preguntas
-            if (game.currentQuestion < game.questions.length) {
-              const nextQuestion = game.questions[game.currentQuestion];
+            if (game.currentQuestion < game.selectedQuestions.length) {
+              const nextQuestion = game.selectedQuestions[game.currentQuestion];
               const timeLimit = 30000; // 30 segundos en milisegundos
               
-              // Resetear las respuestas para la nueva pregunta
-              game.scores = {};
-              game.responseTimes = {};
+              // Resetear solo las respuestas de la pregunta actual, no los scores totales
+              game.currentQuestionScores = {};
+              game.currentQuestionTimes = {};
               
               // Update game in Redis
               await redis.set(`game:${normalizedRoomId}`, JSON.stringify(game));

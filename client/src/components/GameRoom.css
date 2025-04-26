@@ -96,11 +96,13 @@
   border-radius: 8px;
   margin: 10px 0 20px;
   border: 1px solid var(--sith-gray);
-  color: var(--sith-gray);
+  color: var(--sith-gold);
   font-style: italic;
   text-align: center;
   font-size: 0.9rem;
-  opacity: 0.8;
+  opacity: 0.9;
+  text-shadow: 0 0 5px var(--sith-gold);
+  background: linear-gradient(to bottom, var(--sith-black), var(--sith-dark-red));
 }
 
 .timer {

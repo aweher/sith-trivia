@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import './GameRoom.css';
 
 function GameRoom({ socket, gameId, playerName }) {
@@ -18,6 +18,7 @@ function GameRoom({ socket, gameId, playerName }) {
   const [isCorrect, setIsCorrect] = useState(false);
   const [showCountdown, setShowCountdown] = useState(false);
   const [countdown, setCountdown] = useState(3);
+  const navigate = useNavigate();
 
   useEffect(() => {
     console.log('Setting up socket listeners');
@@ -44,6 +45,12 @@ function GameRoom({ socket, gameId, playerName }) {
       setResponseTimes({});
       setShowFeedback(false);
       setShowCountdown(false);
+    });
+
+    socket.on('scoresUpdated', ({ scores, responseTimes }) => {
+      console.log('Scores updated:', scores);
+      setScores(scores);
+      setResponseTimes(responseTimes);
     });
 
     socket.on('answerResult', ({ playerId, isCorrect, points, timeTaken }) => {
@@ -73,14 +80,6 @@ function GameRoom({ socket, gameId, playerName }) {
           }, 1000);
         }, 2000);
       }
-      setScores(prev => ({
-        ...prev,
-        [playerId]: (prev[playerId] || 0) + points
-      }));
-      setResponseTimes(prev => ({
-        ...prev,
-        [playerId]: (prev[playerId] || 0) + timeTaken
-      }));
     });
 
     socket.on('gameEnded', ({ scores, responseTimes }) => {
@@ -96,15 +95,23 @@ function GameRoom({ socket, gameId, playerName }) {
       setError(message);
     });
 
+    // Escuchar el evento de reinicio del juego
+    socket.on('gameReset', () => {
+      console.log('Game reset received, redirecting to home...');
+      navigate('/');
+    });
+
     return () => {
       console.log('Cleaning up socket listeners');
       socket.off('playerJoined');
       socket.off('gameStarted');
+      socket.off('scoresUpdated');
       socket.off('answerResult');
       socket.off('gameEnded');
       socket.off('error');
+      socket.off('gameReset');
     };
-  }, [socket]);
+  }, [socket, navigate]);
 
   useEffect(() => {
     if (timeLeft > 0) {

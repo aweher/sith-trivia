@@ -1,60 +1,57 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import YouTube from 'react-youtube';
 import './Admin.css';
 
 function Admin({ socket }) {
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [message, setMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [player, setPlayer] = useState(null);
 
-  const handleClearAll = async () => {
-    try {
-      setIsLoading(true);
-      setError('');
-      setSuccess('');
-      socket.emit('adminClearAll');
-    } catch (error) {
-      setError('Error al limpiar los datos');
-    } finally {
-      setIsLoading(false);
-    }
+  const onReady = (event) => {
+    setPlayer(event.target);
+    // Reproducir el video automáticamente
+    event.target.playVideo();
+    // Establecer el volumen al 50%
+    event.target.setVolume(50);
   };
 
-  const handleReloadGame = async () => {
-    try {
-      setIsLoading(true);
-      setError('');
-      setSuccess('');
-      socket.emit('adminReloadGame');
-    } catch (error) {
-      setError('Error al recargar el juego');
-    } finally {
-      setIsLoading(false);
-    }
+  const opts = {
+    height: '0',
+    width: '0',
+    playerVars: {
+      autoplay: 1,
+      loop: 1,
+      controls: 0,
+      disablekb: 1,
+      enablejsapi: 1,
+      modestbranding: 1,
+      playsinline: 1,
+      rel: 0,
+      showinfo: 0,
+    },
   };
 
-  const handleStartGame = async () => {
-    try {
-      setIsLoading(true);
-      setError('');
-      setSuccess('');
-      socket.emit('adminStartGame');
-    } catch (error) {
-      setError('Error al iniciar el juego');
-    } finally {
-      setIsLoading(false);
-    }
+  const handleResetGame = () => {
+    setIsLoading(true);
+    setMessage('');
+    socket.emit('adminClearAll');
   };
 
-  // Escuchar respuestas del servidor
-  React.useEffect(() => {
+  const handleStartGame = () => {
+    setIsLoading(true);
+    setMessage('');
+    socket.emit('adminStartGame');
+  };
+
+  useEffect(() => {
     socket.on('adminSuccess', ({ message }) => {
-      setSuccess(message);
-      setError('');
+      setMessage(message);
+      setIsLoading(false);
     });
 
     socket.on('adminError', ({ message }) => {
-      setError(message);
-      setSuccess('');
+      setMessage(message);
+      setIsLoading(false);
     });
 
     return () => {
@@ -65,35 +62,33 @@ function Admin({ socket }) {
 
   return (
     <div className="admin-container">
-      <h2>Panel de Administración</h2>
-      
-      {error && <div className="error-message">{error}</div>}
-      {success && <div className="success-message">{success}</div>}
-      
-      <div className="admin-actions">
-        <button 
-          onClick={handleClearAll} 
-          className="admin-button"
-          disabled={isLoading}
-        >
-          {isLoading ? 'Procesando...' : 'Borrar todas las salas y datos'}
-        </button>
-        
-        <button 
-          onClick={handleReloadGame} 
-          className="admin-button"
-          disabled={isLoading}
-        >
-          {isLoading ? 'Procesando...' : 'Recargar datos del juego'}
-        </button>
-        
-        <button 
-          onClick={handleStartGame} 
-          className="admin-button"
-          disabled={isLoading}
-        >
-          {isLoading ? 'Procesando...' : 'Iniciar juego'}
-        </button>
+      <div className="admin-content">
+        <h2>Panel de Administración</h2>
+        <div className="admin-controls">
+          <button 
+            onClick={handleResetGame} 
+            disabled={isLoading}
+            className="admin-button reset-button"
+          >
+            {isLoading ? 'Procesando...' : 'Reiniciar Juego'}
+          </button>
+          <button 
+            onClick={handleStartGame} 
+            disabled={isLoading}
+            className="admin-button start-button"
+          >
+            {isLoading ? 'Procesando...' : 'Iniciar Juego'}
+          </button>
+        </div>
+        {message && <div className="admin-message">{message}</div>}
+      </div>
+      <div className="youtube-container">
+        <YouTube
+          videoId="PMry1WgSpaU"
+          opts={opts}
+          onReady={onReady}
+          className="youtube-player"
+        />
       </div>
     </div>
   );
