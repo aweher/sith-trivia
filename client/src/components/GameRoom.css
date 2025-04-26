@@ -1,0 +1,201 @@
+.game-room-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.8);
+  border: 2px solid var(--sith-red);
+  border-radius: 10px;
+  box-shadow: 0 0 20px var(--sith-red);
+}
+
+.game-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 30px;
+  padding: 20px;
+  background: var(--sith-gray);
+  border-radius: 8px;
+  border: 1px solid var(--sith-red);
+}
+
+.player-list {
+  background: var(--sith-black);
+  padding: 15px;
+  border-radius: 8px;
+  min-width: 200px;
+  border: 1px solid var(--sith-red);
+}
+
+.player {
+  margin: 5px 0;
+  padding: 10px;
+  background: var(--sith-gray);
+  border-radius: 4px;
+  border: 1px solid var(--sith-red);
+  color: var(--sith-gold);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.player-rank {
+  font-weight: bold;
+  color: var(--sith-red);
+  min-width: 30px;
+}
+
+.player-name {
+  flex: 1;
+}
+
+.player-score {
+  color: var(--sith-gold);
+  font-weight: bold;
+  min-width: 80px;
+  text-align: right;
+}
+
+.player-time {
+  color: var(--sith-gray);
+  font-size: 0.9em;
+  min-width: 60px;
+  text-align: right;
+}
+
+.error-message {
+  background: var(--sith-dark-red);
+  color: var(--sith-gold);
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  text-align: center;
+  border: 1px solid var(--sith-red);
+  box-shadow: 0 0 10px var(--sith-red);
+}
+
+.question-container {
+  background: var(--sith-black);
+  padding: 30px;
+  border-radius: 10px;
+  border: 2px solid var(--sith-red);
+  box-shadow: 0 0 15px var(--sith-red);
+}
+
+.question-help {
+  background: var(--sith-dark-red);
+  padding: 15px;
+  border-radius: 8px;
+  margin: 15px 0;
+  border: 1px solid var(--sith-red);
+  color: var(--sith-gold);
+  font-style: italic;
+  text-align: center;
+  animation: glow 2s infinite;
+}
+
+.timer {
+  text-align: center;
+  font-size: 1.5rem;
+  color: var(--sith-red);
+  margin-bottom: 20px;
+  text-shadow: 0 0 10px var(--sith-red);
+  animation: glow 2s infinite;
+}
+
+.answers-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.answer-button {
+  padding: 20px;
+  font-size: 1.2rem;
+  border: 2px solid var(--sith-red);
+  border-radius: 8px;
+  cursor: pointer;
+  background: var(--sith-black);
+  color: var(--sith-gold);
+  transition: all 0.3s ease;
+}
+
+.answer-button:hover:not(:disabled) {
+  background: var(--sith-dark-red);
+  transform: scale(1.02);
+  box-shadow: 0 0 15px var(--sith-red);
+}
+
+.answer-button.selected {
+  background: var(--sith-red);
+  color: var(--sith-black);
+  box-shadow: 0 0 20px var(--sith-red);
+}
+
+.answer-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+  border-color: var(--sith-gray);
+}
+
+.waiting-screen {
+  text-align: center;
+  padding: 50px;
+  background: var(--sith-black);
+  border-radius: 10px;
+  border: 2px solid var(--sith-red);
+  box-shadow: 0 0 15px var(--sith-red);
+}
+
+.waiting-screen h3 {
+  margin-bottom: 20px;
+  color: var(--sith-red);
+  animation: glow 2s infinite;
+}
+
+.waiting-screen p {
+  color: var(--sith-gold);
+  font-size: 1.1rem;
+  margin-bottom: 30px;
+}
+
+.start-game-button {
+  margin-top: 20px;
+  padding: 15px 30px;
+  font-size: 1.2rem;
+  background: var(--sith-dark-red);
+  color: var(--sith-gold);
+  border: 2px solid var(--sith-red);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 250px;
+}
+
+.start-game-button:hover:not(:disabled) {
+  background: var(--sith-red);
+  color: var(--sith-black);
+  box-shadow: 0 0 20px var(--sith-red);
+  transform: scale(1.05);
+}
+
+.start-game-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: var(--sith-gray);
+  border-color: var(--sith-gray);
+  box-shadow: none;
+}
+
+@keyframes glow {
+  0% {
+    text-shadow: 0 0 10px var(--sith-red);
+  }
+  50% {
+    text-shadow: 0 0 20px var(--sith-red), 0 0 30px var(--sith-dark-red);
+  }
+  100% {
+    text-shadow: 0 0 10px var(--sith-red);
+  }
+} 

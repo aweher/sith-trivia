@@ -1,0 +1,117 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --sith-red: #ff0000;
+  --sith-dark-red: #8b0000;
+  --sith-black: #000000;
+  --sith-gray: #1a1a1a;
+  --sith-light-gray: #333333;
+  --sith-gold: #ffd700;
+}
+
+body {
+  font-family: 'Orbitron', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: var(--sith-black);
+  color: var(--sith-red);
+  background-image: 
+    linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
+    url('https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80');
+  background-size: cover;
+  background-attachment: fixed;
+}
+
+.App {
+  min-height: 100vh;
+}
+
+button {
+  font-family: 'Orbitron', sans-serif;
+  background: var(--sith-dark-red);
+  color: var(--sith-gold);
+  border: 2px solid var(--sith-red);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  transition: all 0.3s ease;
+}
+
+button:hover {
+  background: var(--sith-red);
+  color: var(--sith-black);
+  box-shadow: 0 0 15px var(--sith-red);
+}
+
+input {
+  font-family: 'Orbitron', sans-serif;
+  background: var(--sith-gray);
+  color: var(--sith-gold);
+  border: 1px solid var(--sith-red);
+  padding: 10px;
+  transition: all 0.3s ease;
+}
+
+input:focus {
+  outline: none;
+  border-color: var(--sith-gold);
+  box-shadow: 0 0 10px var(--sith-red);
+}
+
+h1, h2, h3 {
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  text-shadow: 0 0 10px var(--sith-red);
+}
+
+@keyframes glow {
+  0% {
+    text-shadow: 0 0 10px var(--sith-red);
+  }
+  50% {
+    text-shadow: 0 0 20px var(--sith-red), 0 0 30px var(--sith-dark-red);
+  }
+  100% {
+    text-shadow: 0 0 10px var(--sith-red);
+  }
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

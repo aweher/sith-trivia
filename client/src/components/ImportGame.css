@@ -1,0 +1,86 @@
+.import-game-container {
+  max-width: 800px;
+  margin: 50px auto;
+  padding: 30px;
+  background: rgba(0, 0, 0, 0.8);
+  border: 2px solid var(--sith-red);
+  border-radius: 10px;
+  box-shadow: 0 0 20px var(--sith-red);
+}
+
+.import-game-container h2 {
+  text-align: center;
+  color: var(--sith-red);
+  margin-bottom: 30px;
+  text-shadow: 0 0 10px var(--sith-red);
+}
+
+.file-upload-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.file-input {
+  padding: 15px;
+  border: 2px dashed var(--sith-red);
+  border-radius: 8px;
+  background: var(--sith-black);
+  color: var(--sith-gold);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.file-input:hover:not(:disabled) {
+  border-color: var(--sith-gold);
+  box-shadow: 0 0 15px var(--sith-red);
+}
+
+.file-format-info {
+  color: var(--sith-gold);
+  font-size: 0.9rem;
+  text-align: left;
+  width: 100%;
+}
+
+.file-format-info pre {
+  background: var(--sith-black);
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid var(--sith-red);
+  margin-top: 10px;
+  overflow-x: auto;
+  color: var(--sith-gold);
+}
+
+.error-message {
+  background: var(--sith-dark-red);
+  color: var(--sith-gold);
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  text-align: center;
+  border: 1px solid var(--sith-red);
+  box-shadow: 0 0 10px var(--sith-red);
+}
+
+.loading-message {
+  color: var(--sith-gold);
+  text-align: center;
+  margin-top: 20px;
+  font-size: 1.1rem;
+  animation: glow 2s infinite;
+}
+
+@keyframes glow {
+  0% {
+    text-shadow: 0 0 10px var(--sith-red);
+  }
+  50% {
+    text-shadow: 0 0 20px var(--sith-red), 0 0 30px var(--sith-dark-red);
+  }
+  100% {
+    text-shadow: 0 0 10px var(--sith-red);
+  }
+} 

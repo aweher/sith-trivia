@@ -1,0 +1,101 @@
+.create-game-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.8);
+  border: 2px solid var(--sith-red);
+  border-radius: 10px;
+  box-shadow: 0 0 20px var(--sith-red);
+}
+
+.create-game-container h2 {
+  text-align: center;
+  color: var(--sith-red);
+  margin-bottom: 30px;
+  text-shadow: 0 0 10px var(--sith-red);
+}
+
+.error-message {
+  background: var(--sith-dark-red);
+  color: var(--sith-gold);
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  text-align: center;
+  border: 1px solid var(--sith-red);
+  box-shadow: 0 0 10px var(--sith-red);
+}
+
+.question-container {
+  background: var(--sith-gray);
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  border: 1px solid var(--sith-red);
+}
+
+.question-container input[type="text"] {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid var(--sith-red);
+  border-radius: 4px;
+  font-size: 1rem;
+  background: var(--sith-black);
+  color: var(--sith-gold);
+}
+
+.option-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.option-container input[type="text"] {
+  flex: 1;
+}
+
+.option-container input[type="radio"] {
+  margin: 0;
+  accent-color: var(--sith-red);
+}
+
+.add-question {
+  background-color: var(--sith-dark-red);
+  color: var(--sith-gold);
+  padding: 10px 20px;
+  border: 2px solid var(--sith-red);
+  border-radius: 4px;
+  cursor: pointer;
+  margin-right: 10px;
+  transition: all 0.3s ease;
+}
+
+.add-question:hover:not(:disabled) {
+  background: var(--sith-red);
+  color: var(--sith-black);
+  box-shadow: 0 0 15px var(--sith-red);
+}
+
+.create-game {
+  background-color: var(--sith-dark-red);
+  color: var(--sith-gold);
+  padding: 10px 20px;
+  border: 2px solid var(--sith-red);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.create-game:hover:not(:disabled) {
+  background: var(--sith-red);
+  color: var(--sith-black);
+  box-shadow: 0 0 15px var(--sith-red);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+} 

@@ -1,0 +1,59 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    ports:
+      - "55005:55005"
+    environment:
+      - NODE_ENV=development
+      - PORT=55005
+      - SOCKET_CORS_ORIGIN=http://localhost:3000
+      - GAME_TIMEOUT=10000
+      - REDIS_URL=redis://redis:6379
+    volumes:
+      - ./server:/app/server
+      - ./package.json:/app/package.json
+      - ./package-lock.json:/app/package-lock.json
+      - backend_data:/app/data
+    networks:
+      - sith-kahoot-network
+    depends_on:
+      - redis
+
+  frontend:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:55005
+      - REACT_APP_SOCKET_URL=http://localhost:55005
+      - NODE_ENV=development
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+      - frontend_data:/app/build
+    depends_on:
+      - backend
+    networks:
+      - sith-kahoot-network
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - sith-kahoot-network
+
+networks:
+  sith-kahoot-network:
+    driver: bridge
+
+volumes:
+  backend_data:
+  frontend_data:
+  redis_data: 

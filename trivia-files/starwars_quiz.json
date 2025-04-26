@@ -1,0 +1,555 @@
+{
+  "roomId": "SITH-TRIVIA",
+  "questions": [
+    {
+      "question": "¿En qué planeta nació Anakin Skywalker?",
+      "help": "El elegido… criado entre arena y esclavitud. Cómo no iba a pasarse al Lado Oscuro.",
+      "options": [
+        "Tatooine",
+        "Springfield",
+        "Coruscant",
+        "Mustafar"
+      ],
+      "correctAnswer": 0
+    },
+    {
+      "question": "¿Quién fue el maestro de Obi-Wan Kenobi?",
+      "help": "El Jedi que no hacía caso a nadie. Claramente, por eso lo ignoraron… y lo mataron.",
+      "options": [
+        "Mace Windu",
+        "Qui-Gon Jinn",
+        "Don Ramón",
+        "Yoda"
+      ],
+      "correctAnswer": 1
+    },
+    {
+      "question": "¿Cuál es el nombre completo de Darth Vader antes de caer al Lado Oscuro?",
+      "help": "¿Vieron? Hasta los nombres pueden arruinar una infancia.",
+      "options": [
+        "Anakin Skywalker",
+        "Sheev Palpatine",
+        "Ben Solo",
+        "Ricardo Fort"
+      ],
+      "correctAnswer": 0
+    },
+    {
+      "question": "¿Qué tipo de criatura es Yoda?",
+      "help": "Muy Jedi eso...",
+      "options": [
+        "Wookiee",
+        "Desconocido",
+        "Gungan",
+        "Un pepino mutante"
+      ],
+      "correctAnswer": 1
+    },
+    {
+      "question": "¿Cómo se llama el sable de luz de Luke en El Retorno del Jedi?",
+      "help": "Verde esperanza... inútil, por supuesto.",
+      "options": [
+        "Sable verde",
+        "La Espada de Gryffindor",
+        "Darksaber",
+        "Sable azul"
+      ],
+      "correctAnswer": 0
+    },
+    {
+      "question": "¿Cuál es el color del sable de Mace Windu?",
+      "help": "Solo Samuel L. Jackson podía exigir un color propio y salirse con la suya.",
+      "options": [
+        "Color Shrek",
+        "Verde",
+        "Rojo",
+        "Violeta"
+      ],
+      "correctAnswer": 3
+    },
+    {
+      "question": "¿Cómo se llama el planeta de origen de los Wookiees?",
+      "help": "Y no, no se pronuncia como lo deletreaste en tu cabeza.",
+      "options": [
+        "Villa Fiorito",
+        "Kashyyyk",
+        "Hoth",
+        "Endor"
+      ],
+      "correctAnswer": 1
+    },
+    {
+      "question": "¿Qué droide acompañó a los Skywalker durante toda la saga?",
+      "help": "Pequeño, ruidoso… y más útil que la mitad del Senado.",
+      "options": [
+        "R2-D2",
+        "C-3PO",
+        "Terminator",
+        "BB-8"
+      ],
+      "correctAnswer": 0
+    },
+    {
+      "question": "¿Cuál era el rango militar de Leia Organa en la Rebelión?",
+      "help": "Princesa, luego general. Ascenso por herencia, claramente.",
+      "options": [
+        "Gerente de Recursos Humanos",
+        "Comandante",
+        "Teniente",
+        "General"
+      ],
+      "correctAnswer": 3
+    },
+    {
+      "question": "¿Qué arma destruye Alderaan en el Episodio IV?",
+      "help": "Una joya de la ingeniería imperial… demasiado eficaz para el gusto Jedi.",
+      "options": [
+        "Una cacerola gigante",
+        "Destructor Estelar",
+        "Estrella de la Muerte",
+        "Cañón planetario"
+      ],
+      "correctAnswer": 2
+    },
+    {
+      "question": "¿Qué actor interpretó a Han Solo en la trilogía original?",
+      "help": "El único que se aburrió de Star Wars antes que los demás.",
+      "options": [
+        "Ewan McGregor",
+        "Chayanne",
+        "Harrison Ford",
+        "Mark Hamill"
+      ],
+      "correctAnswer": 2
+    },
+    {
+      "question": "¿Qué raza es Jar Jar Binks?",
+      "help": "La peor decisión diplomática de Naboo… y mirá que hubo varias.",
+      "options": [
+        "Un Minion",
+        "Wookiee",
+        "Gungan",
+        "Twi'lek"
+      ],
+      "correctAnswer": 2
+    },
+    {
+      "question": "¿Cómo se llama el planeta capital de la República Galáctica?",
+      "help": "Luces, política y corrupción… no hay nada más Jedi que eso.",
+      "options": [
+        "Macondo",
+        "Naboo",
+        "Coruscant",
+        "Alderaan"
+      ],
+      "correctAnswer": 2
+    },
+    {
+      "question": "¿Cuál es el nombre del cazarrecompensas que captura a Han Solo?",
+      "help": "Tres frases, cero expresión facial, y aún así: leyenda.",
+      "options": [
+        "Cad Bane",
+        "Jango Fett",
+        "Boba Fett",
+        "Walter White"
+      ],
+      "correctAnswer": 2
+    },
+    {
+      "question": "¿Cuál era el nombre del sable azul de Anakin Skywalker?",
+      "help": "Pasó de padre a hijo… como los traumas familiares.",
+      "options": [
+        "La Zanahoria Radiactiva",
+        "Sable Verde",
+        "Darksaber",
+        "El sable azul de Anakin"
+      ],
+      "correctAnswer": 3
+    },
+    {
+      "question": "¿Quién fue el maestro de Anakin?",
+      "help": "Gran decisión, dejarle el más temperamental al tipo más sarcástico del templo.",
+      "options": [
+        "Mace Windu",
+        "Yoda",
+        "Obi-Wan Kenobi",
+        "Gandalf"
+      ],
+      "correctAnswer": 2
+    },
+    {
+      "question": "¿Quién mató a Qui-Gon Jinn?",
+      "help": "Y lo hizo con estilo. Doble hoja. Poco diálogo. Excelente presentación.",
+      "options": [
+        "Un tren fantasma",
+        "Count Dooku",
+        "Darth Vader",
+        "Darth Maul"
+      ],
+      "correctAnswer": 3
+    },
+    {
+      "question": "¿Qué droide dice la frase '¡Oh cielos!'?",
+      "help": "El protocolo con patas… insoportable desde el primer minuto.",
+      "options": [
+        "Alexa",
+        "BB-8",
+        "C-3PO",
+        "R2-D2"
+      ],
+      "correctAnswer": 2
+    },
+    {
+      "question": "¿Qué personaje dice '¡Es una trampa!'?",
+      "help": "El ícono de los memes antes de que existieran los memes.",
+      "options": [
+        "Han Solo",
+        "Luke Skywalker",
+        "Bob Esponja",
+        "Almirante Ackbar"
+      ],
+      "correctAnswer": 3
+    },
+    {
+      "question": "¿Qué nave pilotea Han Solo?",
+      "help": "Sucio, viejo, remendado… como todo lo que aprecian los rebeldes.",
+      "options": [
+        "X-Wing",
+        "Un Renault 12",
+        "El Halcón Milenario",
+        "TIE Fighter"
+      ],
+      "correctAnswer": 2
+    },
+    {
+      "question": "¿Cuál es el nombre real de Palpatine?",
+      "help": "Sheev… sí, yo también lo había bloqueado.",
+      "options": [
+        "Sheev Palpatine",
+        "Anakin Skywalker",
+        "Pancho López",
+        "Darth Sidious"
+      ],
+      "correctAnswer": 0
+    },
+    {
+      "question": "¿Cómo se llama el planeta natal de Padmé Amidala?",
+      "help": "Bonito, pacífico… un desastre político esperando suceder.",
+      "options": [
+        "Isla Fantasía",
+        "Tatooine",
+        "Naboo",
+        "Alderaan"
+      ],
+      "correctAnswer": 2
+    },
+    {
+      "question": "¿Qué Sith lleva una doble hoja en su sable?",
+      "help": "Y aún así lo partieron por la mitad. Literal.",
+      "options": [
+        "Count Dooku",
+        "Darth Maul",
+        "Darth Vader",
+        "El Zorro"
+      ],
+      "correctAnswer": 1
+    },
+    {
+      "question": "¿Quién mató a Darth Maul por segunda vez?",
+      "help": "Sí, él otra vez. Como si no tuviera otra cosa que hacer.",
+      "options": [
+        "Anakin Skywalker",
+        "Mace Windu",
+        "Un Gremlin",
+        "Obi-Wan Kenobi"
+      ],
+      "correctAnswer": 3
+    },
+    {
+      "question": "¿Qué especie es el Gran Almirante Thrawn?",
+      "help": "Azul, frío, brillante… justo lo opuesto a un Jedi.",
+      "options": [
+        "Chiss",
+        "Humano",
+        "Pitufo malvado",
+        "Zabrak"
+      ],
+      "correctAnswer": 0
+    },
+    {
+      "question": "¿Qué miembro del Consejo Jedi sobrevive a la Orden 66?",
+      "help": "Sobrevivir no es sinónimo de éxito. Solo… de evasión.",
+      "options": [
+        "Mace Windu",
+        "Yoda",
+        "Winnie Pooh",
+        "Kit Fisto"
+      ],
+      "correctAnswer": 1
+    },
+    {
+      "question": "¿Qué planeta es destruido en El Despertar de la Fuerza?",
+      "help": "Porque siempre hay que destruir algo para empezar una nueva trilogía.",
+      "options": [
+        "Ciudad Gótica",
+        "Alderaan",
+        "Hosnian Prime",
+        "Endor"
+      ],
+      "correctAnswer": 2
+    },
+    {
+      "question": "¿Qué aprendiz de Jedi sobrevive a la Guerra Clon y abandona la orden?",
+      "help": "Inteligente. Se fue antes de que el templo se viniera abajo.",
+      "options": [
+        "Ahsoka Tano",
+        "Ezra Bridger",
+        "Rey",
+        "Lisa Simpson"
+      ],
+      "correctAnswer": 0
+    },
+    {
+      "question": "¿Qué droide es la pareja de R2-D2?",
+      "help": "La única relación estable en toda la saga.",
+      "options": [
+        "BB-8",
+        "K-2SO",
+        "C-3PO",
+        "Wall-E"
+      ],
+      "correctAnswer": 2
+    },
+    {
+      "question": "¿Qué mineral se usa en los sables de luz?",
+      "help": "Cristales sensibles a la Fuerza. No preguntes cómo.",
+      "options": [
+        "Cristal Kyber",
+        "Beskar",
+        "Piedra filosofal",
+        "Oro Jedi"
+      ],
+      "correctAnswer": 0
+    },
+    {
+      "question": "¿Qué color de sable representa al Lado Oscuro?",
+      "help": "El color del fuego, la pasión… y la verdad.",
+      "options": [
+        "Fucsia brillante",
+        "Rojo",
+        "Verde",
+        "Azul"
+      ],
+      "correctAnswer": 1
+    },
+    {
+      "question": "¿Qué villano fue mitad hombre, mitad máquina?",
+      "help": "Y completamente leyenda.",
+      "options": [
+        "General Grievous",
+        "Robocop",
+        "Darth Vader",
+        "Darth Maul"
+      ],
+      "correctAnswer": 2
+    },
+    {
+      "question": "¿Cómo se llama el sable usado por los Mandalorianos para gobernar?",
+      "help": "Una reliquia con más drama que utilidad.",
+      "options": [
+        "La guitarra de Elvis",
+        "Darksaber",
+        "Sable verde",
+        "Sable de Obi-Wan"
+      ],
+      "correctAnswer": 1
+    },
+    {
+      "question": "¿Qué personaje fue entrenado por Count Dooku antes de caer al Lado Oscuro?",
+      "help": "Claro, tenía que venir de una línea desobediente.",
+      "options": [
+        "Ash Ketchum",
+        "Obi-Wan Kenobi",
+        "Mace Windu",
+        "Qui-Gon Jinn"
+      ],
+      "correctAnswer": 3
+    },
+    {
+      "question": "¿Qué planeta congelado aparece al inicio de El Imperio Contraataca?",
+      "help": "Frío, inhóspito… como el corazón de un Sith.",
+      "options": [
+        "Endor",
+        "Hoth",
+        "Polo Norte",
+        "Kashyyyk"
+      ],
+      "correctAnswer": 1
+    },
+    {
+      "question": "¿Quién fue el maestro de Dooku?",
+      "help": "Falló con Dooku, con Anakin, con casi todos. ¡Gran currículum!",
+      "options": [
+        "Mace Windu",
+        "Yoda",
+        "Plo Koon",
+        "Yayo"
+      ],
+      "correctAnswer": 1
+    },
+    {
+      "question": "¿Qué famosa estructura está en Endor?",
+      "help": "Más grande, más cara… igual de mal protegida.",
+      "options": [
+        "El Templo Jedi",
+        "La cancha de Boca",
+        "La primera Estrella de la Muerte",
+        "La segunda Estrella de la Muerte"
+      ],
+      "correctAnswer": 3
+    },
+    {
+      "question": "¿Quién creó a C-3PO?",
+      "help": "Sí. El mismo que luego destruyó todo. Ironic, ¿no?",
+      "options": [
+        "Tony Stark",
+        "Obi-Wan Kenobi",
+        "Luke Skywalker",
+        "Anakin Skywalker"
+      ],
+      "correctAnswer": 3
+    },
+    {
+      "question": "¿Qué especie dirigía el Senado antes del Imperio?",
+      "help": "Un zoológico con votos.",
+      "options": [
+        "Unicornio rosa",
+        "Twi'lek",
+        "Humanos",
+        "Rodianos"
+      ],
+      "correctAnswer": 2
+    },
+    {
+      "question": "¿Qué personaje dice 'Que la Fuerza te acompañe'?",
+      "help": "Una frase bonita para mandar a alguien a morir.",
+      "options": [
+        "Obi-Wan Kenobi",
+        "Luke Skywalker",
+        "Yoda",
+        "Harry Potter"
+      ],
+      "correctAnswer": 0
+    },
+    {
+      "question": "¿Qué Jedi pierde su mano en el duelo contra Dooku?",
+      "help": "¡Spoiler! Después pierde todo lo demás también.",
+      "options": [
+        "Yoda",
+        "Obi-Wan Kenobi",
+        "La Mona Jiménez",
+        "Anakin Skywalker"
+      ],
+      "correctAnswer": 3
+    },
+    {
+      "question": "¿Cuál es el nombre del sable de Rey al final de la saga?",
+      "help": "Un nuevo color… para una historia reciclada.",
+      "options": [
+        "Luz de emergencia",
+        "Sable verde",
+        "Sable dorado",
+        "Sable azul"
+      ],
+      "correctAnswer": 2
+    },
+    {
+      "question": "¿Qué planeta sirve como base rebelde en el Episodio V?",
+      "help": "Porque esconderse entre hielo siempre es una buena idea… ¿no?",
+      "options": [
+        "Naboo",
+        "La heladera de casa",
+        "Endor",
+        "Hoth"
+      ],
+      "correctAnswer": 3
+    },
+    {
+      "question": "¿Quién derrota al Emperador en El Retorno del Jedi?",
+      "help": "El villano… salvando a todos. Qué irónico.",
+      "options": [
+        "Darth Vader",
+        "Luke Skywalker",
+        "Yoda",
+        "La Abuela de alguien"
+      ],
+      "correctAnswer": 0
+    },
+    {
+      "question": "¿Qué líder militar clonado comanda la Primera Orden?",
+      "help": "Cara de nene malo con uniforme. Patético, pero efectivo.",
+      "options": [
+        "Director Krennic",
+        "General Grievous",
+        "General Hux",
+        "El Dr. Malito"
+      ],
+      "correctAnswer": 2
+    },
+    {
+      "question": "¿Quién es el hijo de Han Solo y Leia Organa?",
+      "help": "Cuando tu tío es un Jedi y aún así te sale emo.",
+      "options": [
+        "Ben Solo",
+        "Luke Skywalker",
+        "Poe Dameron",
+        "Bart Simpson"
+      ],
+      "correctAnswer": 0
+    },
+    {
+      "question": "¿Quién entrena a Luke en Dagobah?",
+      "help": "Entrenamiento exprés: saltitos, frases raras y listo.",
+      "options": [
+        "Qui-Gon Jinn",
+        "Obi-Wan Kenobi",
+        "Yoda",
+        "Chuck Norris"
+      ],
+      "correctAnswer": 2
+    },
+    {
+      "question": "¿Cuál es el apodo de la nave de Boba Fett?",
+      "help": "Y no, no lo cambiamos por corrección política… todavía.",
+      "options": [
+        "El bondi 60",
+        "Razor Crest",
+        "Slave I",
+        "Firespray"
+      ],
+      "correctAnswer": 2
+    },
+    {
+      "question": "¿Qué planeta es conocido por sus campos de lava?",
+      "help": "El lugar ideal para terminar una amistad.",
+      "options": [
+        "Mordor",
+        "Tatooine",
+        "Naboo",
+        "Mustafar"
+      ],
+      "correctAnswer": 3
+    },
+    {
+      "question": "¿Qué personaje dice 'El miedo es el camino al Lado Oscuro'?",
+      "help": "Y tenía razón. Por eso estamos acá.",
+      "options": [
+        "Obi-Wan Kenobi",
+        "Yoda",
+        "Luke Skywalker",
+        "Michael Scott"
+      ],
+      "correctAnswer": 1
+    }
+  ]
+}
