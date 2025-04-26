@@ -25,8 +25,9 @@ app.use(express.json());
 // Store active games
 const games = new Map();
 
-// Variable global para almacenar el ID del juego
+// Variable global para almacenar el ID del juego y el admin
 let currentGameId = null;
+let adminSocketId = null;
 
 // Función para normalizar el ID de la sala
 const normalizeRoomId = (roomId) => roomId.toLowerCase();
@@ -34,17 +35,23 @@ const normalizeRoomId = (roomId) => roomId.toLowerCase();
 // Función para cargar el juego inicial
 async function loadInitialGame() {
   try {
+    console.log('Loading initial game...');
     const quizPath = path.join(__dirname, '../trivia-files/starwars_quiz.json');
+    console.log('Quiz path:', quizPath);
+    
     const quizData = await fs.readFile(quizPath, 'utf8');
     const gameData = JSON.parse(quizData);
+    console.log('Game data loaded:', gameData);
     
     // Normalizar el ID de la sala
     const normalizedRoomId = normalizeRoomId(gameData.roomId);
     currentGameId = normalizedRoomId;
+    console.log('Normalized room ID:', normalizedRoomId);
     
     // Verificar si el juego ya existe
     const existingGame = await redis.get(`game:${normalizedRoomId}`);
     if (!existingGame) {
+      console.log('Creating new game with ID:', normalizedRoomId);
       const game = {
         ...gameData,
         roomId: normalizedRoomId,
@@ -58,10 +65,30 @@ async function loadInitialGame() {
       // Store game in Redis
       await redis.set(`game:${normalizedRoomId}`, JSON.stringify(game));
       games.set(normalizedRoomId, game);
-      console.log('Initial game loaded with ID:', normalizedRoomId);
+      console.log('Initial game loaded successfully with ID:', normalizedRoomId);
+    } else {
+      console.log('Game already exists with ID:', normalizedRoomId);
     }
   } catch (error) {
     console.error('Error loading initial game:', error);
+    throw error;
+  }
+}
+
+// Función para limpiar todos los datos
+async function clearAllData() {
+  try {
+    console.log('Clearing all game data...');
+    const keys = await redis.keys('game:*');
+    if (keys.length > 0) {
+      await redis.del(keys);
+    }
+    games.clear();
+    console.log('All game data cleared successfully');
+    return true;
+  } catch (error) {
+    console.error('Error clearing game data:', error);
+    return false;
   }
 }
 
@@ -74,18 +101,63 @@ io.on('connection', (socket) => {
   if (currentGameId) {
     console.log('Sending game ID to client:', currentGameId);
     socket.emit('gameId', { gameId: currentGameId });
-  } else {
-    console.log('No game ID available to send to client');
   }
 
-  // Manejador para cuando el cliente solicita el ID del juego
-  socket.on('requestGameId', () => {
-    console.log('Client requested game ID');
-    if (currentGameId) {
-      console.log('Sending game ID to client:', currentGameId);
-      socket.emit('gameId', { gameId: currentGameId });
-    } else {
-      console.log('No game ID available to send to client');
+  // Manejadores de administración
+  socket.on('adminClearAll', async () => {
+    console.log('Admin requested to clear all data');
+    try {
+      const success = await clearAllData();
+      if (success) {
+        adminSocketId = socket.id; // Asignar admin
+        socket.emit('adminSuccess', { message: 'Todos los datos han sido borrados' });
+      } else {
+        socket.emit('adminError', { message: 'Error al borrar los datos' });
+      }
+    } catch (error) {
+      console.error('Error in adminClearAll:', error);
+      socket.emit('adminError', { message: 'Error al borrar los datos' });
+    }
+  });
+
+  socket.on('adminReloadGame', async () => {
+    console.log('Admin requested to reload game data');
+    try {
+      await clearAllData();
+      await loadInitialGame();
+      adminSocketId = socket.id; // Asignar admin
+      socket.emit('adminSuccess', { message: 'Datos del juego recargados correctamente' });
+    } catch (error) {
+      console.error('Error in adminReloadGame:', error);
+      socket.emit('adminError', { message: 'Error al recargar los datos del juego' });
+    }
+  });
+
+  socket.on('adminStartGame', async () => {
+    console.log('Admin requested to start game');
+    try {
+      if (currentGameId) {
+        const gameData = await redis.get(`game:${currentGameId}`);
+        if (gameData) {
+          const game = JSON.parse(gameData);
+          const currentQuestion = game.questions[game.currentQuestion];
+          const timeLimit = process.env.GAME_TIMEOUT || 10000;
+          
+          io.to(currentGameId).emit('gameStarted', {
+            question: currentQuestion,
+            timeLimit: timeLimit
+          });
+          
+          socket.emit('adminSuccess', { message: 'Juego iniciado correctamente' });
+        } else {
+          socket.emit('adminError', { message: 'No se encontró el juego actual' });
+        }
+      } else {
+        socket.emit('adminError', { message: 'No hay un juego cargado' });
+      }
+    } catch (error) {
+      console.error('Error in adminStartGame:', error);
+      socket.emit('adminError', { message: 'Error al iniciar el juego' });
     }
   });
 
@@ -134,23 +206,32 @@ io.on('connection', (socket) => {
       const gameData = await redis.get(`game:${normalizedRoomId}`);
       if (gameData) {
         const game = JSON.parse(gameData);
+        
+        // Solo agregar el jugador, no asignar como anfitrión
         game.players.push({ id: socket.id, name: playerName });
         game.scores[socket.id] = 0;
+        game.responseTimes[socket.id] = 0;
         
         // Update game in Redis
         await redis.set(`game:${normalizedRoomId}`, JSON.stringify(game));
         games.set(normalizedRoomId, game);
         
         socket.join(normalizedRoomId);
-        io.to(normalizedRoomId).emit('playerJoined', { players: game.players });
+        
+        // Notificar a todos los jugadores sobre el nuevo jugador
+        io.to(normalizedRoomId).emit('playerJoined', { 
+          players: game.players,
+          hostId: adminSocketId // Enviar el ID del admin como anfitrión
+        });
+        
         console.log(`Player ${playerName} joined game ${normalizedRoomId}`);
       } else {
         console.log('Game not found:', normalizedRoomId);
-        socket.emit('error', { message: 'Game not found' });
+        socket.emit('error', { message: 'Juego no encontrado' });
       }
     } catch (error) {
       console.error('Error joining game:', error);
-      socket.emit('error', { message: 'Error joining game' });
+      socket.emit('error', { message: 'Error al unirse al juego' });
     }
   });
 
@@ -224,26 +305,62 @@ io.on('connection', (socket) => {
           points,
           timeTaken
         });
+
+        // Verificar si todos los jugadores han respondido
+        const allPlayersAnswered = game.players.every(player => 
+          game.scores[player.id] !== undefined
+        );
+
+        if (allPlayersAnswered) {
+          // Esperar 3 segundos antes de pasar a la siguiente pregunta
+          setTimeout(async () => {
+            // Avanzar a la siguiente pregunta
+            game.currentQuestion++;
+            
+            // Verificar si hay más preguntas
+            if (game.currentQuestion < game.questions.length) {
+              const nextQuestion = game.questions[game.currentQuestion];
+              const timeLimit = process.env.GAME_TIMEOUT || 10000;
+              
+              // Resetear las respuestas para la nueva pregunta
+              game.scores = {};
+              game.responseTimes = {};
+              
+              // Update game in Redis
+              await redis.set(`game:${normalizedRoomId}`, JSON.stringify(game));
+              games.set(normalizedRoomId, game);
+              
+              // Enviar la siguiente pregunta a todos los jugadores
+              io.to(normalizedRoomId).emit('gameStarted', {
+                question: nextQuestion,
+                timeLimit: timeLimit
+              });
+            } else {
+              // El juego ha terminado
+              io.to(normalizedRoomId).emit('gameEnded', {
+                scores: game.scores,
+                responseTimes: game.responseTimes
+              });
+            }
+          }, 3000);
+        }
+
         console.log(`Answer submitted for game ${normalizedRoomId}`);
       } else {
         console.log('Game not found:', normalizedRoomId);
-        socket.emit('error', { message: 'Game not found' });
+        socket.emit('error', { message: 'Juego no encontrado' });
       }
     } catch (error) {
       console.error('Error submitting answer:', error);
-      socket.emit('error', { message: 'Error submitting answer' });
+      socket.emit('error', { message: 'Error al enviar la respuesta' });
     }
   });
 
   socket.on('disconnect', async () => {
     console.log('Client disconnected:', socket.id);
-    // Clean up games where this socket was the host
-    for (const [gameId, game] of games.entries()) {
-      if (game.host === socket.id) {
-        await redis.del(`game:${gameId}`);
-        games.delete(gameId);
-        console.log(`Game ${gameId} cleaned up after host disconnect`);
-      }
+    // Si el admin se desconecta, limpiar su ID
+    if (socket.id === adminSocketId) {
+      adminSocketId = null;
     }
   });
 });
@@ -251,6 +368,12 @@ io.on('connection', (socket) => {
 const PORT = process.env.PORT || 55005;
 server.listen(PORT, async () => {
   console.log(`Server running on port ${PORT}`);
-  // Cargar el juego inicial al iniciar el servidor
-  await loadInitialGame();
+  try {
+    // Cargar el juego inicial al iniciar el servidor
+    await loadInitialGame();
+    console.log('Server started successfully');
+  } catch (error) {
+    console.error('Failed to start server:', error);
+    process.exit(1);
+  }
 }); 

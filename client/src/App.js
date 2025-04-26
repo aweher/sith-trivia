@@ -5,6 +5,7 @@ import Home from './components/Home';
 import ImportGame from './components/ImportGame';
 import JoinGame from './components/JoinGame';
 import GameRoom from './components/GameRoom';
+import Admin from './components/Admin';
 import './App.css';
 
 const BACKEND_URL = process.env.REACT_APP_API_URL || 'http://localhost:55005';
@@ -22,6 +23,7 @@ function App() {
           <Route path="/import" element={<ImportGame socket={socket} setGameId={setGameId} />} />
           <Route path="/join" element={<JoinGame socket={socket} setGameId={setGameId} setPlayerName={setPlayerName} />} />
           <Route path="/game/:gameId" element={<GameRoom socket={socket} gameId={gameId} playerName={playerName} />} />
+          <Route path="/admin" element={<Admin socket={socket} />} />
         </Routes>
       </div>
     </Router>

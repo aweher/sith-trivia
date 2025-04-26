@@ -11,19 +11,22 @@ function GameRoom({ socket, gameId, playerName }) {
   const [responseTimes, setResponseTimes] = useState({});
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [gameStarted, setGameStarted] = useState(false);
+  const [gameEnded, setGameEnded] = useState(false);
   const [isHost, setIsHost] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    // Verificar si este jugador es el anfitrión
-    socket.on('gameCreated', ({ gameId }) => {
-      if (gameId === urlGameId) {
-        setIsHost(true);
-      }
-    });
-
-    socket.on('playerJoined', ({ players }) => {
+    console.log('Setting up socket listeners');
+    console.log('Current socket ID:', socket.id);
+    
+    socket.on('playerJoined', ({ players, hostId }) => {
+      console.log('Players updated:', players);
+      console.log('Host ID:', hostId);
+      console.log('Current socket ID:', socket.id);
+      console.log('Is host?', socket.id === hostId);
+      
       setPlayers(players);
+      setIsHost(socket.id === hostId);
     });
 
     socket.on('gameStarted', ({ question, timeLimit }) => {
@@ -31,6 +34,7 @@ function GameRoom({ socket, gameId, playerName }) {
       setCurrentQuestion(question);
       setTimeLeft(timeLimit);
       setGameStarted(true);
+      setGameEnded(false);
       setSelectedAnswer(null);
       setScores({});
       setResponseTimes({});
@@ -47,18 +51,28 @@ function GameRoom({ socket, gameId, playerName }) {
       }));
     });
 
+    socket.on('gameEnded', ({ scores, responseTimes }) => {
+      console.log('Game ended with scores:', scores);
+      setGameEnded(true);
+      setGameStarted(false);
+      setScores(scores);
+      setResponseTimes(responseTimes);
+    });
+
     socket.on('error', ({ message }) => {
+      console.error('Server error:', message);
       setError(message);
     });
 
     return () => {
-      socket.off('gameCreated');
+      console.log('Cleaning up socket listeners');
       socket.off('playerJoined');
       socket.off('gameStarted');
       socket.off('answerResult');
+      socket.off('gameEnded');
       socket.off('error');
     };
-  }, [socket, urlGameId]);
+  }, [socket]);
 
   useEffect(() => {
     if (timeLeft > 0) {
@@ -71,6 +85,7 @@ function GameRoom({ socket, gameId, playerName }) {
 
   const handleStartGame = () => {
     console.log('Starting game with ID:', urlGameId);
+    console.log('Is host?', isHost);
     setError('');
     socket.emit('startGame', { gameId: urlGameId });
   };
@@ -144,18 +159,43 @@ function GameRoom({ socket, gameId, playerName }) {
         </div>
       )}
 
-      {!gameStarted && (
+      {gameEnded && (
+        <div className="game-end-container">
+          <h3>¡Juego Terminado!</h3>
+          <div className="final-scores">
+            <h4>Resultados Finales:</h4>
+            {getPlayerRanking().map((player, index) => (
+              <div key={player.id} className="final-player">
+                <span className="player-rank">#{index + 1}</span>
+                <span className="player-name">{player.name}</span>
+                <span className="player-score">{player.score} pts</span>
+                <span className="player-time">({Math.round(player.time / 1000)}s)</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {!gameStarted && !gameEnded && (
         <div className="waiting-screen">
           <h3>Esperando a que los jugadores se unan...</h3>
           <p>Comparte el ID del juego con tus amigos: {urlGameId}</p>
-          {isHost && (
-            <button 
-              onClick={handleStartGame} 
-              className="start-game-button"
-              disabled={players.length < 2}
-            >
-              {players.length < 2 ? 'Esperando más jugadores...' : 'Iniciar Juego'}
-            </button>
+          {isHost ? (
+            <div className="admin-controls">
+              <p className="admin-message">Eres el administrador. Puedes iniciar el juego cuando todos los jugadores estén listos.</p>
+              <button 
+                onClick={handleStartGame} 
+                className="start-game-button"
+                disabled={players.length < 2}
+              >
+                {players.length < 2 ? 'Esperando más jugadores...' : 'Iniciar Juego'}
+              </button>
+            </div>
+          ) : (
+            <div className="player-waiting">
+              <p className="waiting-message">Esperando a que el administrador inicie el juego...</p>
+              <p className="player-count">Jugadores en la sala: {players.length}</p>
+            </div>
           )}
         </div>
       )}
