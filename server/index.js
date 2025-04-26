@@ -305,7 +305,9 @@ io.on('connection', (socket) => {
         // Notificar a todos los jugadores sobre el nuevo jugador y sus puntajes
         io.to(normalizedRoomId).emit('playerJoined', { 
           players: game.players,
-          hostId: adminSocketId // Enviar el ID del admin como anfitrión
+          hostId: adminSocketId, // Enviar el ID del admin como anfitrión
+          scores: game.scores,
+          responseTimes: game.responseTimes
         });
 
         // Enviar actualización de puntajes
@@ -313,8 +315,25 @@ io.on('connection', (socket) => {
           scores: game.scores,
           responseTimes: game.responseTimes
         });
+
+        // Si el juego ya está en curso, enviar el estado actual
+        if (game.currentQuestion !== undefined && game.selectedQuestions) {
+          const currentQuestion = game.selectedQuestions[game.currentQuestion];
+          if (currentQuestion) {
+            socket.emit('gameStarted', {
+              question: currentQuestion,
+              timeLimit: 30000
+            });
+            
+            // Enviar los puntajes actuales al nuevo jugador
+            socket.emit('scoresUpdated', {
+              scores: game.scores,
+              responseTimes: game.responseTimes
+            });
+          }
+        }
         
-        console.log(`Player ${playerName} joined game ${normalizedRoomId}`);
+        console.log(`Player ${playerName} joined game ${normalizedRoomId} with scores:`, game.scores);
       } else {
         console.log('Game not found:', normalizedRoomId);
         socket.emit('error', { message: 'Juego no encontrado' });
@@ -411,7 +430,8 @@ io.on('connection', (socket) => {
         // Enviar actualización de puntuación a todos los jugadores
         io.to(normalizedRoomId).emit('scoresUpdated', {
           scores: game.scores,
-          responseTimes: game.responseTimes
+          responseTimes: game.responseTimes,
+          players: game.players
         });
         
         io.to(normalizedRoomId).emit('answerResult', {
@@ -454,7 +474,8 @@ io.on('connection', (socket) => {
               // Enviar actualización de puntajes después de cada pregunta
               io.to(normalizedRoomId).emit('scoresUpdated', {
                 scores: game.scores,
-                responseTimes: game.responseTimes
+                responseTimes: game.responseTimes,
+                players: game.players
               });
             } else {
               // El juego ha terminado

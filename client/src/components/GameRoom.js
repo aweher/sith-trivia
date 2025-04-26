@@ -13,25 +13,28 @@ function GameRoom({ socket, gameId, playerName }) {
   const [gameStarted, setGameStarted] = useState(false);
   const [gameEnded, setGameEnded] = useState(false);
   const [isHost, setIsHost] = useState(false);
+  const [hostId, setHostId] = useState(null);
   const [error, setError] = useState('');
   const [showFeedback, setShowFeedback] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
   const [showCountdown, setShowCountdown] = useState(false);
   const [countdown, setCountdown] = useState(3);
+  const [questionNumber, setQuestionNumber] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
     console.log('Setting up socket listeners');
     console.log('Current socket ID:', socket.id);
     
-    socket.on('playerJoined', ({ players, hostId }) => {
-      console.log('Players updated:', players);
-      console.log('Host ID:', hostId);
-      console.log('Current socket ID:', socket.id);
-      console.log('Is host?', socket.id === hostId);
-      
-      setPlayers(players);
-      setIsHost(socket.id === hostId);
+    // Solicitar el ID del juego al conectarse
+    socket.emit('requestGameId');
+    
+    socket.on('playerJoined', (data) => {
+      setPlayers(data.players);
+      setHostId(data.hostId);
+      setIsHost(socket.id === data.hostId);
+      setScores(data.scores || {});
+      setResponseTimes(data.responseTimes || {});
     });
 
     socket.on('gameStarted', ({ question, timeLimit }) => {
@@ -45,10 +48,28 @@ function GameRoom({ socket, gameId, playerName }) {
       setShowCountdown(false);
     });
 
-    socket.on('scoresUpdated', ({ scores, responseTimes }) => {
-      console.log('Scores updated:', scores);
-      setScores(scores);
-      setResponseTimes(responseTimes);
+    socket.on('scoresUpdated', (data) => {
+      setScores(prevScores => ({
+        ...prevScores,
+        ...data.scores
+      }));
+      setResponseTimes(prevTimes => ({
+        ...prevTimes,
+        ...data.responseTimes
+      }));
+      // Actualizar la lista de jugadores si se proporciona
+      if (data.players) {
+        setPlayers(data.players);
+      }
+    });
+
+    socket.on('gameState', (data) => {
+      if (data.players) setPlayers(data.players);
+      if (data.scores) setScores(data.scores);
+      if (data.responseTimes) setResponseTimes(data.responseTimes);
+      if (data.currentQuestion) setCurrentQuestion(data.currentQuestion);
+      if (data.questionNumber !== undefined) setQuestionNumber(data.questionNumber);
+      setShowFeedback(false);
     });
 
     socket.on('answerResult', ({ playerId, isCorrect, points, timeTaken }) => {
@@ -109,6 +130,7 @@ function GameRoom({ socket, gameId, playerName }) {
       socket.off('gameEnded');
       socket.off('error');
       socket.off('gameReset');
+      socket.off('gameState');
     };
   }, [socket, navigate]);
 
@@ -140,18 +162,19 @@ function GameRoom({ socket, gameId, playerName }) {
   };
 
   const getPlayerRanking = () => {
-    return players
-      .map(player => ({
-        ...player,
-        score: scores[player.id] || 0,
-        time: responseTimes[player.id] || 0
-      }))
-      .sort((a, b) => {
-        if (a.score !== b.score) {
-          return b.score - a.score;
-        }
-        return a.time - b.time;
-      });
+    const rankedPlayers = [...players].sort((a, b) => {
+      const scoreA = scores[a.id] || 0;
+      const scoreB = scores[b.id] || 0;
+      const timeA = responseTimes[a.id] || 0;
+      const timeB = responseTimes[b.id] || 0;
+      
+      if (scoreB !== scoreA) {
+        return scoreB - scoreA;
+      }
+      return timeA - timeB;
+    });
+    
+    return rankedPlayers;
   };
 
   return (
@@ -159,13 +182,15 @@ function GameRoom({ socket, gameId, playerName }) {
       <div className="game-header">
         <h2>Sala de Juego: {urlGameId}</h2>
         <div className="player-list">
-          <h3>Jugadores:</h3>
+          <h3>Ranking de Jugadores</h3>
           {getPlayerRanking().map((player, index) => (
-            <div key={player.id} className="player">
-              <span className="player-rank">#{index + 1}</span>
+            <div key={player.id} className={`player-item ${player.id === socket.id ? 'current-player' : ''}`}>
+              <span className="player-rank">{index + 1}.</span>
               <span className="player-name">{player.name}</span>
-              <span className="player-score">{player.score} pts</span>
-              <span className="player-time">({Math.round(player.time / 1000)}s)</span>
+              <span className="player-score">{scores[player.id] || 0} pts</span>
+              <span className="player-time">
+                {(responseTimes[player.id] || 0).toFixed(1)}s
+              </span>
             </div>
           ))}
         </div>
@@ -227,7 +252,7 @@ function GameRoom({ socket, gameId, playerName }) {
                 <span className="player-rank">#{index + 1}</span>
                 <span className="player-name">{player.name}</span>
                 <span className="player-score">{player.score} pts</span>
-                <span className="player-time">({Math.round(player.time / 1000)}s)</span>
+                <span className="player-time">({Math.round(player.responseTime / 1000)}s)</span>
               </div>
             ))}
           </div>
