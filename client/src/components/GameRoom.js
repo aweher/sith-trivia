@@ -76,15 +76,17 @@ function GameRoom({ socket, gameId, playerName }) {
       if (playerId === socket.id) {
         setIsCorrect(isCorrect);
         setShowFeedback(true);
-        // Ocultar el feedback después de 2 segundos
-        setTimeout(() => {
+        
+        let feedbackTimeout;
+        let countdownTimeout;
+        let countdownInterval;
+
+        feedbackTimeout = setTimeout(() => {
           setShowFeedback(false);
-          // Mostrar el countdown después de que se oculte el feedback
           setShowCountdown(true);
           setCountdown(3);
           
-          // Usar un intervalo más preciso para el countdown
-          const countdownInterval = setInterval(() => {
+          countdownInterval = setInterval(() => {
             setCountdown(prev => {
               if (prev <= 1) {
                 clearInterval(countdownInterval);
@@ -94,8 +96,7 @@ function GameRoom({ socket, gameId, playerName }) {
             });
           }, 1000);
 
-          // Mantener la pantalla visible por 8 segundos en total
-          setTimeout(() => {
+          countdownTimeout = setTimeout(() => {
             setShowCountdown(false);
           }, 8000);
         }, 2000);
@@ -162,20 +163,50 @@ function GameRoom({ socket, gameId, playerName }) {
   };
 
   const getPlayerRanking = () => {
-    const rankedPlayers = [...players].sort((a, b) => {
-      const scoreA = scores[a.id] || 0;
-      const scoreB = scores[b.id] || 0;
-      const timeA = responseTimes[a.id] || 0;
-      const timeB = responseTimes[b.id] || 0;
-      
-      if (scoreB !== scoreA) {
-        return scoreB - scoreA;
-      }
-      return timeA - timeB;
-    });
+    const rankedPlayers = [...players]
+      .filter(player => player && player.id) // Filtrar jugadores inválidos
+      .sort((a, b) => {
+        const scoreA = scores[a.id] || 0;
+        const scoreB = scores[b.id] || 0;
+        const timeA = responseTimes[a.id] || 0;
+        const timeB = responseTimes[b.id] || 0;
+        
+        if (scoreB !== scoreA) {
+          return scoreB - scoreA;
+        }
+        return timeA - timeB;
+      });
     
     return rankedPlayers;
   };
+
+  // Agregar manejo de reconexión
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      socket.emit('playerDisconnected', { gameId: urlGameId });
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      socket.emit('playerDisconnected', { gameId: urlGameId });
+    };
+  }, [socket, urlGameId]);
+
+  // Limpiar estado al desmontar
+  useEffect(() => {
+    return () => {
+      setGameStarted(false);
+      setGameEnded(false);
+      setCurrentQuestion(null);
+      setTimeLeft(0);
+      setSelectedAnswer(null);
+      setShowFeedback(false);
+      setShowCountdown(false);
+      setCountdown(3);
+    };
+  }, []);
 
   return (
     <div className="game-room-container">
