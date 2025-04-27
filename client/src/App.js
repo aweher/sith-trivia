@@ -9,7 +9,7 @@ import Admin from './components/Admin';
 import MatomoTracker from './components/MatomoTracker';
 import './App.css';
 
-const BACKEND_URL = process.env.REACT_APP_API_URL || 'http://localhost:55005';
+const BACKEND_URL = process.env.REACT_APP_API_URL || 'http://backend:55005';
 const socket = io(BACKEND_URL, {
   withCredentials: true,
   transports: ['websocket', 'polling'],

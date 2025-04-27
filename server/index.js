@@ -18,7 +18,7 @@ const io = socketIo(server, {
 });
 
 // Redis connection
-const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
+const redis = new Redis(process.env.REDIS_URL || 'redis://redis:6379');
 
 // Middleware para prevenir caché
 app.use((req, res, next) => {
