@@ -8,7 +8,6 @@ services:
     environment:
       - NODE_ENV=development
       - PORT=55005
-      - SOCKET_CORS_ORIGIN=http://localhost:3000
       - GAME_TIMEOUT=10000
       - REDIS_URL=redis://redis:6379
     volumes:

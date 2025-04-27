@@ -10,12 +10,8 @@ function JoinGame({ socket }) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.log('JoinGame component mounted');
-    console.log('Socket connected:', socket.connected);
-    
     // Solicitar el ID del juego al conectarse
     socket.emit('requestGameId');
-    console.log('Requested game ID');
 
     // Escuchar la respuesta con el ID del juego
     socket.on('gameId', ({ gameId }) => {
@@ -23,16 +19,8 @@ function JoinGame({ socket }) {
       setGameId(gameId);
     });
 
-    // Escuchar errores
-    socket.on('error', ({ message }) => {
-      console.error('Socket error:', message);
-      setError(message);
-      setIsLoading(false);
-    });
-
     return () => {
       socket.off('gameId');
-      socket.off('error');
     };
   }, [socket]);
 
@@ -50,7 +38,6 @@ function JoinGame({ socket }) {
 
     setIsLoading(true);
     setError('');
-    console.log('Joining game with ID:', gameId);
     socket.emit('joinGame', { gameId, playerName });
   };
 
