@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import './GameRoom.css';
 import useMatomoTracking from '../hooks/useMatomoTracking';
+import useSocketConnection from '../hooks/useSocketConnection';
 
 function GameRoom({ socket, gameId, playerName }) {
   const { gameId: urlGameId } = useParams();
@@ -22,16 +23,13 @@ function GameRoom({ socket, gameId, playerName }) {
   const [countdown, setCountdown] = useState(3);
   const [questionNumber, setQuestionNumber] = useState(0);
   const navigate = useNavigate();
-  const [isConnecting, setIsConnecting] = useState(true);
-  const [connectionError, setConnectionError] = useState(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { isConnected, reconnectAttempts, lastError, manualReconnect } = useSocketConnection(socket);
   const { trackGameStart, trackGameEnd, trackAnswer, trackPlayerJoin, trackPlayerLeave } = useMatomoTracking();
 
   useEffect(() => {
     console.log('Setting up socket listeners');
     console.log('Current socket ID:', socket.id);
     
-    // Solicitar el ID del juego al conectarse
     socket.emit('requestGameId');
     trackPlayerJoin(urlGameId);
 
@@ -55,6 +53,15 @@ function GameRoom({ socket, gameId, playerName }) {
       trackGameStart(urlGameId);
     });
 
+    socket.on('nextQuestion', ({ question, timeLimit }) => {
+      console.log('Next question:', question);
+      setCurrentQuestion(question);
+      setTimeLeft(timeLimit);
+      setSelectedAnswer(null);
+      setShowFeedback(false);
+      setShowCountdown(false);
+    });
+
     socket.on('scoresUpdated', (data) => {
       setScores(prevScores => ({
         ...prevScores,
@@ -64,7 +71,6 @@ function GameRoom({ socket, gameId, playerName }) {
         ...prevTimes,
         ...data.responseTimes
       }));
-      // Actualizar la lista de jugadores si se proporciona
       if (data.players) {
         setPlayers(data.players);
       }
@@ -108,6 +114,12 @@ function GameRoom({ socket, gameId, playerName }) {
             setShowCountdown(false);
           }, 8000);
         }, 2000);
+
+        return () => {
+          clearTimeout(feedbackTimeout);
+          clearTimeout(countdownTimeout);
+          clearInterval(countdownInterval);
+        };
       }
     });
 
@@ -120,28 +132,24 @@ function GameRoom({ socket, gameId, playerName }) {
       trackGameEnd(urlGameId, scores[socket.id] || 0);
     });
 
-    socket.on('error', ({ message }) => {
-      console.error('Server error:', message);
-      setError(message);
-    });
-
-    // Escuchar el evento de reinicio del juego
     socket.on('gameReset', () => {
-      console.log('Game reset received, redirecting to home...');
+      console.log('Game reset received');
+      setPlayers([]);
+      setScores({});
+      setResponseTimes({});
+      setCurrentQuestion(null);
+      setGameStarted(false);
+      setGameEnded(false);
+      setSelectedAnswer(null);
+      setShowFeedback(false);
+      setShowCountdown(false);
+      setCountdown(3);
       navigate('/');
     });
 
-    setIsConnecting(false);
-    setConnectionError(null);
-
-    socket.on('connect', () => {
-      setIsConnecting(false);
-      setConnectionError(null);
-    });
-
-    socket.on('connect_error', (error) => {
-      setConnectionError('Error de conexión. Por favor, intenta de nuevo.');
-      setIsConnecting(false);
+    socket.on('error', ({ message }) => {
+      console.error('Server error:', message);
+      setError(message);
     });
 
     return () => {
@@ -149,14 +157,13 @@ function GameRoom({ socket, gameId, playerName }) {
       trackPlayerLeave(urlGameId);
       socket.off('playerJoined');
       socket.off('gameStarted');
+      socket.off('nextQuestion');
       socket.off('scoresUpdated');
       socket.off('answerResult');
       socket.off('gameEnded');
       socket.off('error');
       socket.off('gameReset');
       socket.off('gameState');
-      socket.off('connect');
-      socket.off('connect_error');
     };
   }, [socket, navigate, urlGameId, trackPlayerJoin, trackPlayerLeave, trackGameStart, trackGameEnd, trackAnswer]);
 
@@ -177,8 +184,7 @@ function GameRoom({ socket, gameId, playerName }) {
   };
 
   const handleAnswerSelect = (answerIndex) => {
-    if (selectedAnswer === null && !isSubmitting) {
-      setIsSubmitting(true);
+    if (selectedAnswer === null) {
       setSelectedAnswer(answerIndex);
       socket.emit('submitAnswer', {
         gameId: urlGameId,
@@ -190,7 +196,7 @@ function GameRoom({ socket, gameId, playerName }) {
 
   const getPlayerRanking = () => {
     const rankedPlayers = [...players]
-      .filter(player => player && player.id) // Filtrar jugadores inválidos
+      .filter(player => player && player.id)
       .sort((a, b) => {
         const scoreA = scores[a.id] || 0;
         const scoreB = scores[b.id] || 0;
@@ -204,6 +210,10 @@ function GameRoom({ socket, gameId, playerName }) {
       });
     
     return rankedPlayers;
+  };
+
+  const formatTime = (time) => {
+    return (time / 1000).toFixed(1);
   };
 
   // Agregar manejo de reconexión
@@ -236,17 +246,20 @@ function GameRoom({ socket, gameId, playerName }) {
 
   return (
     <div className="game-room-container" role="main">
-      {isConnecting && (
-        <div className="loading-overlay" role="alert" aria-live="polite">
-          <div className="loading-spinner"></div>
-          <p>Conectando al juego...</p>
-        </div>
-      )}
-
-      {connectionError && (
-        <div className="error-overlay" role="alert">
-          <p>{connectionError}</p>
-          <button onClick={() => window.location.reload()}>Reintentar</button>
+      {/* Connection Status */}
+      {!isConnected && (
+        <div className="connection-status">
+          <div className="connection-error">
+            <p>Error de conexión: {lastError}</p>
+            <p>Intentos de reconexión: {reconnectAttempts}</p>
+            <button 
+              onClick={manualReconnect}
+              className="reconnect-button"
+              disabled={reconnectAttempts >= 5}
+            >
+              {reconnectAttempts >= 5 ? 'Máximo de intentos alcanzado' : 'Reconectar'}
+            </button>
+          </div>
         </div>
       )}
 
@@ -265,8 +278,8 @@ function GameRoom({ socket, gameId, playerName }) {
               <span className="player-score" aria-label={`${scores[player.id] || 0} puntos`}>
                 {scores[player.id] || 0} pts
               </span>
-              <span className="player-time" aria-label={`${(responseTimes[player.id] || 0).toFixed(1)} segundos`}>
-                {(responseTimes[player.id] || 0).toFixed(1)}s
+              <span className="player-time" aria-label={`${formatTime(responseTimes[player.id] || 0)} segundos`}>
+                {formatTime(responseTimes[player.id] || 0)}s
               </span>
             </div>
           ))}
@@ -327,9 +340,9 @@ function GameRoom({ socket, gameId, playerName }) {
             {currentQuestion.options.map((option, index) => (
               <button
                 key={index}
-                className={`answer-button ${selectedAnswer === index ? 'selected' : ''} ${isSubmitting ? 'submitting' : ''}`}
+                className={`answer-button ${selectedAnswer === index ? 'selected' : ''}`}
                 onClick={() => handleAnswerSelect(index)}
-                disabled={selectedAnswer !== null || isSubmitting}
+                disabled={selectedAnswer !== null}
                 role="radio"
                 aria-checked={selectedAnswer === index}
                 aria-label={`Opción ${index + 1}: ${option}`}
@@ -357,8 +370,8 @@ function GameRoom({ socket, gameId, playerName }) {
                 <span className="player-score" aria-label={`${player.score} puntos`}>
                   {player.score} pts
                 </span>
-                <span className="player-time" aria-label={`${Math.round(player.responseTime / 1000)} segundos`}>
-                  ({Math.round(player.responseTime / 1000)}s)
+                <span className="player-time" aria-label={`${formatTime(player.responseTime)} segundos`}>
+                  {formatTime(player.responseTime)}s
                 </span>
               </div>
             ))}
