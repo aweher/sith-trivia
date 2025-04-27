@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import './GameRoom.css';
+import useMatomoTracking from '../hooks/useMatomoTracking';
 
 function GameRoom({ socket, gameId, playerName }) {
   const { gameId: urlGameId } = useParams();
@@ -21,6 +22,10 @@ function GameRoom({ socket, gameId, playerName }) {
   const [countdown, setCountdown] = useState(3);
   const [questionNumber, setQuestionNumber] = useState(0);
   const navigate = useNavigate();
+  const [isConnecting, setIsConnecting] = useState(true);
+  const [connectionError, setConnectionError] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { trackGameStart, trackGameEnd, trackAnswer, trackPlayerJoin, trackPlayerLeave } = useMatomoTracking();
 
   useEffect(() => {
     console.log('Setting up socket listeners');
@@ -28,7 +33,8 @@ function GameRoom({ socket, gameId, playerName }) {
     
     // Solicitar el ID del juego al conectarse
     socket.emit('requestGameId');
-    
+    trackPlayerJoin(urlGameId);
+
     socket.on('playerJoined', (data) => {
       setPlayers(data.players);
       setHostId(data.hostId);
@@ -46,6 +52,7 @@ function GameRoom({ socket, gameId, playerName }) {
       setSelectedAnswer(null);
       setShowFeedback(false);
       setShowCountdown(false);
+      trackGameStart(urlGameId);
     });
 
     socket.on('scoresUpdated', (data) => {
@@ -76,6 +83,7 @@ function GameRoom({ socket, gameId, playerName }) {
       if (playerId === socket.id) {
         setIsCorrect(isCorrect);
         setShowFeedback(true);
+        trackAnswer(urlGameId, isCorrect, timeLeft);
         
         let feedbackTimeout;
         let countdownTimeout;
@@ -109,6 +117,7 @@ function GameRoom({ socket, gameId, playerName }) {
       setGameStarted(false);
       setScores(scores);
       setResponseTimes(responseTimes);
+      trackGameEnd(urlGameId, scores[socket.id] || 0);
     });
 
     socket.on('error', ({ message }) => {
@@ -122,8 +131,22 @@ function GameRoom({ socket, gameId, playerName }) {
       navigate('/');
     });
 
+    setIsConnecting(false);
+    setConnectionError(null);
+
+    socket.on('connect', () => {
+      setIsConnecting(false);
+      setConnectionError(null);
+    });
+
+    socket.on('connect_error', (error) => {
+      setConnectionError('Error de conexión. Por favor, intenta de nuevo.');
+      setIsConnecting(false);
+    });
+
     return () => {
       console.log('Cleaning up socket listeners');
+      trackPlayerLeave(urlGameId);
       socket.off('playerJoined');
       socket.off('gameStarted');
       socket.off('scoresUpdated');
@@ -132,8 +155,10 @@ function GameRoom({ socket, gameId, playerName }) {
       socket.off('error');
       socket.off('gameReset');
       socket.off('gameState');
+      socket.off('connect');
+      socket.off('connect_error');
     };
-  }, [socket, navigate]);
+  }, [socket, navigate, urlGameId, trackPlayerJoin, trackPlayerLeave, trackGameStart, trackGameEnd, trackAnswer]);
 
   useEffect(() => {
     if (timeLeft > 0) {
@@ -152,7 +177,8 @@ function GameRoom({ socket, gameId, playerName }) {
   };
 
   const handleAnswerSelect = (answerIndex) => {
-    if (selectedAnswer === null) {
+    if (selectedAnswer === null && !isSubmitting) {
+      setIsSubmitting(true);
       setSelectedAnswer(answerIndex);
       socket.emit('submitAnswer', {
         gameId: urlGameId,
@@ -209,17 +235,37 @@ function GameRoom({ socket, gameId, playerName }) {
   }, []);
 
   return (
-    <div className="game-room-container">
+    <div className="game-room-container" role="main">
+      {isConnecting && (
+        <div className="loading-overlay" role="alert" aria-live="polite">
+          <div className="loading-spinner"></div>
+          <p>Conectando al juego...</p>
+        </div>
+      )}
+
+      {connectionError && (
+        <div className="error-overlay" role="alert">
+          <p>{connectionError}</p>
+          <button onClick={() => window.location.reload()}>Reintentar</button>
+        </div>
+      )}
+
       <div className="game-header">
         <h2>Sala de Juego: {urlGameId}</h2>
-        <div className="player-list">
+        <div className="player-list" role="region" aria-label="Ranking de Jugadores">
           <h3>Ranking de Jugadores</h3>
           {getPlayerRanking().map((player, index) => (
-            <div key={player.id} className={`player-item ${player.id === socket.id ? 'current-player' : ''}`}>
-              <span className="player-rank">{index + 1}.</span>
+            <div 
+              key={player.id} 
+              className={`player-item ${player.id === socket.id ? 'current-player' : ''}`}
+              role="listitem"
+            >
+              <span className="player-rank" aria-label={`Posición ${index + 1}`}>{index + 1}.</span>
               <span className="player-name">{player.name}</span>
-              <span className="player-score">{scores[player.id] || 0} pts</span>
-              <span className="player-time">
+              <span className="player-score" aria-label={`${scores[player.id] || 0} puntos`}>
+                {scores[player.id] || 0} pts
+              </span>
+              <span className="player-time" aria-label={`${(responseTimes[player.id] || 0).toFixed(1)} segundos`}>
                 {(responseTimes[player.id] || 0).toFixed(1)}s
               </span>
             </div>
@@ -227,10 +273,18 @@ function GameRoom({ socket, gameId, playerName }) {
         </div>
       </div>
 
-      {error && <div className="error-message">{error}</div>}
+      {error && (
+        <div className="error-message" role="alert">
+          {error}
+        </div>
+      )}
 
       {showFeedback && (
-        <div className={`feedback-container ${isCorrect ? 'correct' : 'incorrect'}`}>
+        <div 
+          className={`feedback-container ${isCorrect ? 'correct' : 'incorrect'}`}
+          role="alert"
+          aria-live="polite"
+        >
           <img 
             src={`/assets/${isCorrect ? 'kyber_red.png' : 'kyber_green.png'}?t=${Date.now()}`}
             alt={isCorrect ? "Respuesta Correcta" : "Respuesta Incorrecta"} 
@@ -243,27 +297,42 @@ function GameRoom({ socket, gameId, playerName }) {
       )}
 
       {showCountdown && (
-        <div className="countdown-container" style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
+        <div 
+          className="countdown-container" 
+          role="timer"
+          aria-live="polite"
+          aria-label={`Siguiente pregunta en ${countdown} segundos`}
+        >
           <div className="countdown-number">{countdown}</div>
         </div>
       )}
 
       {gameStarted && currentQuestion && !showCountdown && (
         <div className="question-container">
-          <div className="timer">Tiempo Restante: {Math.floor(timeLeft / 1000)}s</div>
+          <div 
+            className="timer" 
+            role="timer"
+            aria-live="polite"
+            aria-label={`Tiempo restante: ${Math.floor(timeLeft / 1000)} segundos`}
+          >
+            Tiempo Restante: {Math.floor(timeLeft / 1000)}s
+          </div>
           <h3>{currentQuestion.question}</h3>
           {currentQuestion.help && (
             <div className="question-help">
               <p>{currentQuestion.help}</p>
             </div>
           )}
-          <div className="answers-grid">
+          <div className="answers-grid" role="radiogroup" aria-label="Opciones de respuesta">
             {currentQuestion.options.map((option, index) => (
               <button
                 key={index}
-                className={`answer-button ${selectedAnswer === index ? 'selected' : ''}`}
+                className={`answer-button ${selectedAnswer === index ? 'selected' : ''} ${isSubmitting ? 'submitting' : ''}`}
                 onClick={() => handleAnswerSelect(index)}
-                disabled={selectedAnswer !== null}
+                disabled={selectedAnswer !== null || isSubmitting}
+                role="radio"
+                aria-checked={selectedAnswer === index}
+                aria-label={`Opción ${index + 1}: ${option}`}
               >
                 {option}
               </button>
@@ -273,16 +342,24 @@ function GameRoom({ socket, gameId, playerName }) {
       )}
 
       {gameEnded && (
-        <div className="game-end-container">
+        <div className="game-end-container" role="region" aria-label="Resultados finales">
           <h3>¡Juego Terminado!</h3>
           <div className="final-scores">
             <h4>Resultados Finales:</h4>
             {getPlayerRanking().map((player, index) => (
-              <div key={player.id} className="final-player">
-                <span className="player-rank">#{index + 1}</span>
+              <div 
+                key={player.id} 
+                className="final-player"
+                role="listitem"
+              >
+                <span className="player-rank" aria-label={`Posición ${index + 1}`}>#{index + 1}</span>
                 <span className="player-name">{player.name}</span>
-                <span className="player-score">{player.score} pts</span>
-                <span className="player-time">({Math.round(player.responseTime / 1000)}s)</span>
+                <span className="player-score" aria-label={`${player.score} puntos`}>
+                  {player.score} pts
+                </span>
+                <span className="player-time" aria-label={`${Math.round(player.responseTime / 1000)} segundos`}>
+                  ({Math.round(player.responseTime / 1000)}s)
+                </span>
               </div>
             ))}
           </div>
@@ -290,7 +367,7 @@ function GameRoom({ socket, gameId, playerName }) {
       )}
 
       {!gameStarted && !gameEnded && (
-        <div className="waiting-screen">
+        <div className="waiting-screen" role="region" aria-label="Pantalla de espera">
           <h3>Esperando a que los jugadores se unan...</h3>
           <p>Comparte el ID del juego con tus amigos: {urlGameId}</p>
           {isHost ? (
@@ -300,6 +377,7 @@ function GameRoom({ socket, gameId, playerName }) {
                 onClick={handleStartGame} 
                 className="start-game-button"
                 disabled={players.length < 2}
+                aria-label={players.length < 2 ? 'Esperando más jugadores...' : 'Iniciar Juego'}
               >
                 {players.length < 2 ? 'Esperando más jugadores...' : 'Iniciar Juego'}
               </button>
@@ -307,7 +385,9 @@ function GameRoom({ socket, gameId, playerName }) {
           ) : (
             <div className="player-waiting">
               <p className="waiting-message">Esperando a que el administrador inicie el juego...</p>
-              <p className="player-count">Jugadores en la sala: {players.length}</p>
+              <p className="player-count" aria-live="polite">
+                Jugadores en la sala: {players.length}
+              </p>
             </div>
           )}
         </div>

@@ -6,6 +6,7 @@ import ImportGame from './components/ImportGame';
 import JoinGame from './components/JoinGame';
 import GameRoom from './components/GameRoom';
 import Admin from './components/Admin';
+import MatomoTracker from './components/MatomoTracker';
 import './App.css';
 
 const BACKEND_URL = process.env.REACT_APP_API_URL || 'http://localhost:55005';
@@ -17,6 +18,7 @@ function App() {
 
   return (
     <Router>
+      <MatomoTracker />
       <div className="App">
         <Routes>
           <Route path="/" element={<Home />} />
