@@ -9,12 +9,25 @@ require('dotenv').config();
 
 const app = express();
 const server = http.createServer(app);
+
+// Configurar CORS para Socket.IO
 const io = socketIo(server, {
   cors: {
-    origin: process.env.SOCKET_CORS_ORIGIN || "http://localhost:3000",
-    methods: ["GET", "POST"]
+    origin: process.env.NODE_ENV === 'production' 
+      ? ['https://trivia.sith.app', 'http://localhost:3000']
+      : '*',
+    methods: ["GET", "POST"],
+    credentials: true
   }
 });
+
+// Configurar CORS para Express
+app.use(cors({
+  origin: process.env.NODE_ENV === 'production'
+    ? ['https://trivia.sith.app', 'http://localhost:3000']
+    : '*',
+  credentials: true
+}));
 
 // Redis connection
 const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
@@ -28,7 +41,6 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(cors());
 app.use(express.json());
 
 // Store active games
@@ -136,6 +148,8 @@ async function loadInitialGame() {
       console.log('Initial game loaded successfully with ID:', normalizedRoomId);
     } else {
       console.log('Game already exists with ID:', normalizedRoomId);
+      // Asegurarse de que currentGameId esté establecido incluso si el juego ya existe
+      currentGameId = normalizedRoomId;
     }
   } catch (error) {
     console.error('Error loading initial game:', error);
