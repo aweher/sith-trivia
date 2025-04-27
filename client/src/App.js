@@ -9,7 +9,8 @@ import Admin from './components/Admin';
 import MatomoTracker from './components/MatomoTracker';
 import './App.css';
 
-const BACKEND_URL = process.env.REACT_APP_API_URL || 'http://localhost:55005';
+// Use relative URL for socket connection
+const BACKEND_URL = window.location.origin;
 const socket = io(BACKEND_URL);
 
 function App() {
