@@ -48,8 +48,8 @@ npm run client
 ```
 
 The application will be available at:
-- Frontend: http://localhost:3000
-- Backend: http://localhost:5000
+- Frontend: https://trivia.sith.app
+- Backend: https://trivia-backend.sith.app
 
 ## How to Play
 
